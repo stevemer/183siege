@@ -5,13 +5,14 @@ from constants import *
 from maps import *
 from utils import *
 from game import *
+from getch import getch
 import asciiart
 
 
 
 ####################################################
 
-         
+random.seed()         
 game = Game()
 user = '\0'
 result = True
@@ -23,9 +24,13 @@ while (user != 'q'):
         raw_input("[ENTER] to quit")
         sys.exit(0)
     elif result == 1: 
-        user = raw_input ("Sir Knight, input your move. (W: up, S: down, A: left, D: right, X: automatic): ")
+        print "Sir Knight, input your move. (W: up, S: down, A: left, D: right, X: automatic): ",
+        user = getch()
+        print
     elif result == 0:
-        user = raw_input ("Sorry, that's a wall. Try again? (W: up, S: down, A: left, D: right, X: automatic): ")
+        print "Sorry, that's a wall. Try again? (W: up, S: down, A: left, D: right, X: automatic): ",
+        user = getch()
+        print
     if user == 'w':
         result = game.move("UP") 
     elif user == 's':
@@ -34,4 +39,5 @@ while (user != 'q'):
         result = game.move("LEFT")
     elif user == 'd':
         result = game.move("RIGHT")
+print "Bye"
     

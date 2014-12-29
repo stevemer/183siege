@@ -1,12 +1,15 @@
 import asciiart
+import random
 from weapons import *
 from maps import *
 from utils import *
 from maps import *
+from getch import getch
+
 
 class Game(object):
     def __init__(self):
-        self.health = 100
+        self.player = Player()
         self.items = [MeleeWeapon("SWORD", "Wooden Sword", 1, "Normal"), Defense("SHIELD", "Wooden Shield", 1, "Normal")]         
         self.lefthand = 1
         self.righthand = 2 #TODO will cause probs if less than 2 items held
@@ -89,33 +92,54 @@ class Game(object):
         for x in new_split(CHARACTER3, getattr(asciiart, enemy.name), 162, 15): 
             print x
         # print info table
-        print SCREEN.format(hp=str(self.health) + "/100", ehp=str(enemy.health), estr=str(enemy.strength))
+        print SCREEN.format(hp=str(self.player.health) + "/100", ehp=str(enemy.health), estr=str(enemy.strength))
 
         # print weapons?
         self.printItems()
 
     def runEvent(self, enemy):
         # Combat loop
-        self.printScreen(enemy, "An enemy Goblin appeared!")
-        while enemy.health > 0:
-            decision = raw_input("What will you do? (Attack: 'A/a', Run: 'R/r', Switch Weapons: 'S#/s#' to use weapon #")
-            while decision not in ['A', 'R', 'S']:
-                decision = raw_input("What will you do? (Attack: 'A/a', Run: 'R/r', Switch Weapons: 'S#/s#' to use weapon #")
+        self.printScreen(enemy, "An enemy {} appeared!".format(enemy.fancyname))
+        isPlayerTurn = True
+        while not enemy.isDead() and not self.player.isDead():
+            # Player's move
+            if isPlayerTurn:
+                print "What will you do? (Attack: 'x', Run: 'c', Switch Weapons: 'v#' to use weapon # ",
+                decision = getch()
+                while decision not in ['x', 'c', 'v']:
+                    self.printScreen(enemy, "An enemy {} appeared!".format(enemy.fancyname))
+                    print "That's not a valid command! (Attack: 'A/a', Run: 'R/r', Switch Weapons: 'S#/s#' to use weapon # ",
+                    decision = getch()
 
-            message = "No action taken"
-            if decision == 'A':
-                enemy.health -= 1
-                message = "You hit the enemy Goblin for 1 damage!"
-            elif decision == 'R':
-                message = "You can't run away!"
-            elif decision == 'S':
-                message = "You chose to switch weapons (but you only have 1)"
-            self.printScreen(enemy, message)
+                message = "No action taken"
+                if decision == 'x':
+                    enemy.health -= 1
+                    self.printScreen(enemy, "You hit the enemy Goblin for 1 damage!")
+                elif decision == 'c':
+                    self.printScreen(enemy, "You can't run away!")
+                elif decision == 'v':
+                    self.printScreen(enemy, "You chose to switch weapons (but you only have 1)")
+                else:
+                    assert(False and "Invalid command specified")
+                time.sleep(2)
+            # Enemy's move
+            else:
+                # enemy will of course hit back
+                self.player.damage(enemy.strength)
+                self.printScreen(enemy, "The enemy {0} hits you for {1} damage!".format(enemy.fancyname, enemy.strength))
+
+                pass
+            # Change whose turn it is
+            isPlayerTurn = False if isPlayerTurn else True
             
 
     def checkEvent(self, tile):
         pass
-        #self.runEvent(Enemy())
+        random.seed()
+        event_probability = 10 / 187.5
+        event_value = random.uniform(0,1)
+        if event_value <= event_probability:
+            self.runEvent(Enemy())
 
     def move(self, direction):
         tile = (-1,-1)
