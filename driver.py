@@ -1,4 +1,4 @@
-import random, time
+import random, time, sys
 from asciiart import *
 from weapons import *
 from constants import *
@@ -20,6 +20,8 @@ while (user != 'q'):
     game.map.printMap()
     if result == 2:
         print VICTORY_SCREEN
+        raw_input("[ENTER] to quit")
+        sys.exit(0)
     elif result == 1: 
         user = raw_input ("Sir Knight, input your move. (W: up, S: down, A: left, D: right, X: automatic): ")
     elif result == 0:
