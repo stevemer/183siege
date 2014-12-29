@@ -2,3 +2,6 @@ MAP_WIDTH = 80
 MAP_HEIGHT = 38
 
 VISIBLE_TILES = ['X', ' ', '@']
+
+RIGHT_HAND = 1
+LEFT_HAND = 0
