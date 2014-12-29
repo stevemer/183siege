@@ -1,0 +1,27 @@
+NEXT ATTACK = decide whether to block it or not STRONG ATTCK OR WEAK ATTK
+
+HIT CHANCE - lower for stronger attacks? REALLY STRONG attks be bad optimized
+
+sttrat = look for low attks then attack or switch etc
+
+can shield decay? idk
+
+move limit = game mechanic? noooo
+
+hp only
+
+potions?
+
+hit with strongest weapon vs their type
+
+switch based on enemy attacks
+
+swords can decay?
+
+enemies drop swords <
+
+enemy drpepd sword would u like to pick up? which to replace?
+
+
+
+
