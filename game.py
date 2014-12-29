@@ -2,15 +2,16 @@ import asciiart
 from weapons import *
 from maps import *
 from utils import *
+from maps import *
 
 class Game(object):
     def __init__(self):
         self.health = 100
-        self.items = [RangedWeapon("BOW", "Big Bow", 5, "Ice"), Defense("SHIELD", "Gnommish Shield", 5, "Fire"),
-                      MeleeWeapon("SWORD", "Strong Sword", 5, "Ice"), Defense("SHIELD", "Fire Shield", 5, "Fire"),
-                      MeleeWeapon("SWORD", "Sword of Ages", 5, "Ice"), Defense("SHIELD", "Swift Shield", 5, "Fire")]
-        self.lefthand = 0
-        self.righthand = 0 #TODO will cause probs if less than 2 items held
+        self.items = [MeleeWeapon("SWORD", "Wooden Sword", 1, "Normal"), Defense("SHIELD", "Wooden Shield", 1, "Normal")]         
+        self.lefthand = 1
+        self.righthand = 2 #TODO will cause probs if less than 2 items held
+
+        self.map = Map()
        
     def equip_left(self, num):
         self.lefthand = num - 1
@@ -30,7 +31,7 @@ class Game(object):
 
     def miscItemData(self):
         data = []
-        for i in range(13):
+        for i in range(14):
             data.append("") 
         data[1] = ("Left Hand: {}".format(self.lefthand))    
         data[2] = ("Right Hand: {}".format(self.righthand))    
@@ -67,16 +68,17 @@ class Game(object):
         #lines.append("- " * 80)
         lines.append("| 1." + " " * 32 + "| 2." + " " * 32 + "| 3." + " " * 32 + "| Equipped" + " " * 44 + "|")
         for i in range(6):
-            lines.append("| " + ("{:18s}".format(str(iteminfo[0][i])) if itemlist[0] else " " * 18) + (imagelist[0].split("\n")[i] if itemlist[0] else "            ")
-                       + "| " + ("{:18s}".format(str(iteminfo[1][i])) if itemlist[1] else " " * 18) + (imagelist[1].split("\n")[i] if itemlist[1] else "            ")
-                       + "| " + ("{:18s}".format(str(iteminfo[2][i])) if itemlist[2] else " " * 18) + (imagelist[2].split("\n")[i] if itemlist[2] else "            ")
+            lines.append("| " + ("{:18s}".format(str(iteminfo[0][i])) if itemlist[0] else " " * 18) + (imagelist[0].split("\n")[i] if itemlist[0] else " " * 16)
+                       + "| " + ("{:18s}".format(str(iteminfo[1][i])) if itemlist[1] else " " * 18) + (imagelist[1].split("\n")[i] if itemlist[1] else " " * 16)
+                       + "| " + ("{:18s}".format(str(iteminfo[2][i])) if itemlist[2] else " " * 18) + (imagelist[2].split("\n")[i] if itemlist[2] else " " * 16)
                        + "| " + "{:52s}".format(miscItems[i]) + "|")
         lines.append("- " * 54 + "| " + "{:52s}".format(miscItems[6]) + "|")
+        lines.append("| 4." + " " * 32 + "| 5." + " " * 32 + "| 6." + " " * 32 + "| " + "{:52s}".format(miscItems[7]) + "|")
         for i in range(6):
-            lines.append("| " + ("{:18s}".format(str(iteminfo[3][i])) if itemlist[3] else " " * 18) + (imagelist[3].split("\n")[i] if itemlist[3] else "            ")
-                       + "| " + ("{:18s}".format(str(iteminfo[4][i])) if itemlist[4] else " " * 18) + (imagelist[4].split("\n")[i] if itemlist[4] else "            ")
-                       + "| " + ("{:18s}".format(str(iteminfo[5][i])) if itemlist[5] else " " * 18) + (imagelist[5].split("\n")[i] if itemlist[5] else "            ")
-                       + "| " + "{:52s}".format(miscItems[i + 7]) + "|")
+            lines.append("| " + ("{:18s}".format(str(iteminfo[3][i])) if itemlist[3] else " " * 18) + (imagelist[3].split("\n")[i] if itemlist[3] else " " * 16)
+                       + "| " + ("{:18s}".format(str(iteminfo[4][i])) if itemlist[4] else " " * 18) + (imagelist[4].split("\n")[i] if itemlist[4] else " " * 16)
+                       + "| " + ("{:18s}".format(str(iteminfo[5][i])) if itemlist[5] else " " * 18) + (imagelist[5].split("\n")[i] if itemlist[5] else " " * 16)
+                       + "| " + "{:52s}".format(miscItems[i + 8]) + "|")
         lines.append("- " * 82)
         for line in lines:
             print line
@@ -111,44 +113,26 @@ class Game(object):
             self.printScreen(enemy, message)
             
 
-    def checkEvent(self, map, tile):
+    def checkEvent(self, tile):
         pass
-        self.runEvent(Enemy())
-        #if tile == mapFind(map, '#'):
-        #    time.sleep(3)
+        #self.runEvent(Enemy())
 
-    def move(self, map, player):
-        map.tiles[player[0]][player[1]].data = ' ' 
-        loc = map.mapFind('#') 
-        offset = [0,0]
-        if loc[0] > player[0]:
-            offset[0] = 1
-        elif loc[0] < player[0]:
-            offset[0] = -1
-        # implicit else of 0
-
-        if loc[1] > player[1]:
-            offset[1] = 1
-        elif loc[1] < player[1]:
-            offset[1] = -1
-        #implicit else of 0
-
-        newTile = (player[0] + offset[0], player[1] + offset[1])
-        
-        if newTile == map.mapFind('#'):
-            # if have completed room
-            map.tiles[newTile[0]][newTile[1]].data = 'X'  
-            map.printMap()
-
-            map.clear()
-            player = (10, 10)
-            generateRoom(map, player)
-            map.tiles[10][10].data = 'X'
-            return (10, 10)
-
+    def move(self, direction):
+        tile = (-1,-1)
+        x,y = self.map.player
+        if direction == 'UP':
+            tile = (x-1,y)
+        elif direction == "DOWN":
+            tile = (x+1,y)
+        elif direction == "RIGHT":
+            tile = (x,y+1)
+        elif direction == "LEFT":
+            tile = (x,y-1)
         # is there something on this square?
-        self.checkEvent(map, newTile)
-
-        map.tiles[newTile[0]][newTile[1]].data = 'X'
-        return newTile 
-
+        if self.map.canMove(direction):
+            if self.map.mapMove(direction):
+                return 2
+            self.checkEvent(tile)
+            return 1 
+        else:
+            return 0 

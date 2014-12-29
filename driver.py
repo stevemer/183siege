@@ -12,16 +12,24 @@ import asciiart
 ####################################################
 
          
-myMap = Map()
-player = (10, 10)
-myMap.generateRoom(player)
 game = Game()
-myMap.tiles[10][10].data = 'X'
-myMap.printMap()
-user = raw_input ("input your move: ")
+user = '\0'
+result = True
 while (user != 'q'):
     #handle move
-    if user == 'l':
-        player = game.move(myMap, player)
-    myMap.printMap()
-    user = raw_input ("input your move: ")
+    game.map.printMap()
+    if result == 2:
+        print VICTORY_SCREEN
+    elif result == 1: 
+        user = raw_input ("Sir Knight, input your move. (W: up, S: down, A: left, D: right, X: automatic): ")
+    elif result == 0:
+        user = raw_input ("Sorry, that's a wall. Try again? (W: up, S: down, A: left, D: right, X: automatic): ")
+    if user == 'w':
+        result = game.move("UP") 
+    elif user == 's':
+        result = game.move("DOWN")
+    elif user == 'a':
+        result = game.move("LEFT")
+    elif user == 'd':
+        result = game.move("RIGHT")
+    
