@@ -20,9 +20,11 @@ class Enemy(Entity):
     def __init__(self):
         self.name = "GOBLIN"
         self.fancyname = "Cave Goblin"
+        self.element = "Ice"
         self.health = 3
-        self.strength = 5
+        self.strength = 5 # wrong - should be based on weapon!
         self.item = RangedWeapon("BOW", "Gnommish Bow", 5, "Normal")
+        self.next_attack = 0
 
 class Item(object):
     def __init__(self):

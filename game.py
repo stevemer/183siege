@@ -10,7 +10,8 @@ from getch import getch
 class Game(object):
     def __init__(self):
         self.player = Player()
-        self.items = [MeleeWeapon("SWORD", "Wooden Sword", 1, "Normal"), Defense("SHIELD", "Wooden Shield", 1, "Normal")]         
+        self.items = [MeleeWeapon("SWORD", "Wooden Sword", 1, "Normal"), Defense("SHIELD", "Wooden Shield", 1, "Normal"),
+                      MeleeWeapon("SWORD", "Big Sword", 3, "Normal"), Defense("SHIELD", "Big Shield", 3, "Normal")]
         self.lefthand = 0
         self.righthand = 1 #TODO will cause probs if less than 2 items held
 
@@ -48,19 +49,30 @@ class Game(object):
     def drop_item(self, num):
         self.items.pop(num - 1)
 
-    def miscItemData(self):
+    def miscItemData(self, enemy):
+        # returns a list of 14 strings used to populate the game data
+
+        # the first 7 needed for enemy
+
         data = []
         for i in range(14):
             data.append("") 
-        data[1] = ("Left Hand: {}".format(self.lefthand))    
-        data[2] = ("Right Hand: {}".format(self.righthand))    
+        data[0] = "Type: {}".format(enemy.fancyname)
+        data[1] = "Element: {}".format(enemy.element)
+        data[2] = "Weapon: {}".format(enemy.item.fancyname)
+        data[3] = "Next Attack: {}".format(STRENGTHNAMES[enemy.next_attack])
+        data[4] = "- " * 25
+        data[5] = "ITEMS"
+        
+        data[9] = ("Left Hand: {}".format(self.lefthand))    
+        data[10] = ("Right Hand: {}".format(self.righthand))    
 
-        data[9] = ("Potions: {}".format(9)) # num potions store in game #TODO
-        data[10] = ("Keys: {}".format(3)) # num keys in game #TODO
-        data[11] = ("Trinkets: {}".format(2)) # num trinkets
+        data[11] = ("Potions: {}".format(9)) # num potions store in game #TODO
+        data[12] = ("Keys: {}".format(3)) # num keys in game #TODO
+        data[13] = ("Trinkets: {}".format(2)) # num trinkets
         return data
 
-    def printItems(self): #TODO: list enemy weapon in case we want it?
+    def printItems(self, enemy): #TODO: list enemy weapon in case we want it?
 
         # populate list
         itemlist = []
@@ -81,11 +93,11 @@ class Game(object):
             if itemlist[i] != None:
                 imagelist.append(getattr(asciiart, itemlist[i].name))
 
-        miscItems = self.miscItemData()
+        miscItems = self.miscItemData(enemy)
 
         lines = []
         #lines.append("- " * 80)
-        lines.append("| 1." + " " * 32 + "| 2." + " " * 32 + "| 3." + " " * 32 + "| Equipped" + " " * 44 + "|")
+        lines.append("| 1." + " " * 32 + "| 2." + " " * 32 + "| 3." + " " * 32 + "| ENEMY   " + " " * 44 + "|")
         for i in range(6):
             lines.append("| " + ("{:18s}".format(str(iteminfo[0][i])) if itemlist[0] else " " * 18) + (imagelist[0].split("\n")[i] if itemlist[0] else " " * 16)
                        + "| " + ("{:18s}".format(str(iteminfo[1][i])) if itemlist[1] else " " * 18) + (imagelist[1].split("\n")[i] if itemlist[1] else " " * 16)
@@ -103,6 +115,7 @@ class Game(object):
             print line
 
     def printScreen(self, enemy, message):
+        print
         printMessageBox(message)
         # print battlefield
         for x in new_split(CHARACTER3, getattr(asciiart, enemy.name), 162, 15): 
@@ -111,30 +124,45 @@ class Game(object):
         print SCREEN.format(hp=str(self.player.health) + "/100", ehp=str(enemy.health), estr=str(enemy.strength))
 
         # print weapons?
-        self.printItems()
+        self.printItems(enemy)
 
     def runEvent(self, enemy):
         # Combat loop
-        self.printScreen(enemy, "An enemy {} appeared!".format(enemy.fancyname))
         isPlayerTurn = True
 
+        self.printScreen(enemy, "An enemy {} appeared!".format(enemy.fancyname))
         playerStance = "NEUTRAL"
     
         while not enemy.isDead() and not self.player.isDead():
             # Player's move
             if isPlayerTurn:
+                enemy.next_attack = random.randint(1,5)
+
+                self.printScreen(enemy, "What will you do?")
+
                 print "What will you do? (Attack: 'x', Shield: 'c', Switch Weapons: 'v + </> + 1/2/3/4/5/6' to equip weapon # in hand </>): ",
                 decision = getch()
                 while decision not in ['x', 'c', 'v']:
-                    self.printScreen(enemy, "An enemy {} appeared!".format(enemy.fancyname))
+                    self.printScreen(enemy, "What will you do?")
                     print "That's not a valid command! (Attack: 'x', Shield: 'c', Switch Weapons: 'v + </> + 1/2/3/4/5/6' to equip weapon # in hand </>) ",
                     decision = getch()
 
                 message = "No action taken"
                 if decision == 'x':
                     playerStance = "OFFENSIVE"
-                    enemy.health -= 1
-                    self.printScreen(enemy, "You hit the enemy Goblin for 1 damage!")
+                    playerDamage = sum([self.items[x].strength for x in [self.lefthand, self.righthand] if isinstance(self.items[x], Weapon) and not isinstance(self.items[x], Defense)])
+                    print "total player damage: {}".format(playerDamage)
+                    enemy.damage(playerDamage)
+                    self.printScreen(enemy, "You hit the enemy Goblin for {} damage!".format(playerDamage))
+                
+                # for if we use items
+                elif decision == 'i':
+                    playerStance = "NEUTRAL"
+                    # using items
+                    print "You can't drink a potion now!"
+                    decision = '?'
+                    continue
+    
                 elif decision == 'c':
                     playerStance = "DEFENSIVE"
                     # is there a shield equipped?
@@ -175,7 +203,7 @@ class Game(object):
             # Enemy's move
             else:
                 # enemy will of course hit back
-                damage = enemy.strength
+                damage = (enemy.item.strength / 2) * enemy.next_attack
                 # player is shielding
                 shield_level = 0
                 if playerStance == "DEFENSIVE":
@@ -190,13 +218,23 @@ class Game(object):
                 if block_chance and event_value <= block_chance + 0.5:
                     self.printScreen(enemy, "You successfully blocked the enemy attack!")
                 else:
-                    self.player.damage(enemy.strength)
-                    self.printScreen(enemy, "The enemy {0} hits you for {1} damage!".format(enemy.fancyname, enemy.strength))
+                    self.player.damage(damage)
+                    self.printScreen(enemy, "The enemy {0} hits you for {1} damage!".format(enemy.fancyname, damage))
 
                 pass
             # Change whose turn it is
             isPlayerTurn = False if isPlayerTurn else True
-            
+            pass
+        
+        # someone died
+        if enemy.isDead():
+            enemy.name = "DEAD_" + enemy.name
+            self.printScreen(enemy, "You defeated the enemy {}!".format(enemy.fancyname))
+            time.sleep(2)
+
+        elif self.player.isDead():
+            print "DEFEAT"
+            sys.exit(0)
 
     def checkEvent(self, tile):
         pass
