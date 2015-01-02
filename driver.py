@@ -1,4 +1,3 @@
-import random, time, sys
 from asciiart import *
 from weapons import *
 from constants import *
@@ -6,14 +5,23 @@ from maps import *
 from utils import *
 from game import *
 from getch import getch
+from dungeon_generator import *
 import asciiart
 
+import random, time, sys
 
 
 ####################################################
 
 random.seed()         
 game = Game()
+outmap = Map()
+outside = getEntrance()
+for line in outside:
+    print line
+print "Press [ENTER] to begin your adventure..."
+getch()
+
 user = '\0'
 result = True
 while (user != 'q'):

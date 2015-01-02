@@ -51,7 +51,7 @@ class Game(object):
         iteminfo = []
         for item in itemlist:
             if item != None:
-                itemdata = [item.name, item.strength, "", "", "", ""] # replaced [2] with item.element to ""
+                itemdata = [item.name, "Strength: {}".format(item.strength), "", "", "", ""] # replaced [2] with item.element to ""
                 iteminfo.append(itemdata)
             else:
                 iteminfo.append(None)

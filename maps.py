@@ -1,5 +1,5 @@
 from constants import *
-from dungeon_generator import getMap
+from dungeon_generator import getMap, getEntrance
 import time, random
 from asciiart import *
 
