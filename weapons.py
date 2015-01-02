@@ -1,31 +1,6 @@
 class GenericItemSelection(Exception):
     pass
 
-class Entity(object):
-    def __init__(self):
-        self.health = 5
-        pass
-
-    def damage(self, num):
-        self.health -= min(self.health, num)
-
-    def isDead(self):
-        return not self.health
-
-class Player(Entity):
-    def __init__(self):
-        self.health = 100
-
-class Enemy(Entity):
-    def __init__(self):
-        self.name = "GOBLIN"
-        self.fancyname = "Cave Goblin"
-        self.element = "Ice"
-        self.health = 3
-        self.strength = 5 # wrong - should be based on weapon!
-        self.item = RangedWeapon("BOW", "Gnommish Bow", 5, "Normal")
-        self.next_attack = 0
-
 class Item(object):
     def __init__(self):
         raise GenericItemSelection()
@@ -37,7 +12,6 @@ class Weapon(Item):
         self.strength = strength
         self.element = element 
         self.fancyname = fancyname
-        
 
 class MeleeWeapon(Weapon):
     def __init__(self, name, fancyname,  strength, element):
