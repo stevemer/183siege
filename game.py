@@ -74,8 +74,8 @@ class Game(object):
         data[4] = "- " * 25
         data[5] = "ITEMS"
         
-        data[9] = ("Left Hand: {}".format(self.lefthand))    
-        data[10] = ("Right Hand: {}".format(self.righthand))    
+        data[9] = ("Left Hand: {}".format(self.lefthand + 1))    
+        data[10] = ("Right Hand: {}".format(self.righthand + 1))    
 
         data[11] = ("Potions: {}".format(9)) # num potions store in game #TODO
         data[12] = ("Keys: {}".format(3)) # num keys in game #TODO
@@ -132,7 +132,7 @@ class Game(object):
             mailbox.append(messages.pop(0))
         message = "\n".join(mailbox)
         '''
-        while len(messages) > 10:
+        while len(messages) > 8:
             messages.pop(0)
         message = "\n".join(messages)
 
@@ -161,8 +161,8 @@ class Game(object):
         return decision
 
     def playerTurn(self, enemy):
-        print "Player turn"
         # set environment variables
+        self.printScreen(enemy, self.messages)
         enemy.next_attack = random.randint(1,5)
         decision = self.getUserMove(enemy)
         playerDamage = 0
@@ -171,7 +171,7 @@ class Game(object):
 
         # ATTACKING
         if decision == 'x':
-            playerStance = "OFFENSIVE"
+            self.playerStance = "OFFENSIVE"
             # are we attacking with a ranged weapon?
             if isinstance(self.items[self.lefthand], RangedWeapon):
                 # deal the damage
@@ -194,28 +194,30 @@ class Game(object):
             print "HIT"
             if runs and not enemy.isDead():
                 self.messages.append("The {} runs closer to you...".format(enemy.fancyname))
-            self.printScreen(enemy, self.messages)
 
             # if the enemy ran towards us, we can take another turn for free
             if runs and not self.player.isDead() and not enemy.isDead():
                 self.playerTurn(enemy)
+            return True
         
         # ITEMS
         elif decision == 'i':
-            playerStance = "NEUTRAL"
+            self.playerStance = "NEUTRAL"
             # using items TODO
             print "You can't drink a potion now!"
             return False
 
         # SHIELDING
         elif decision == 'c':
-            playerStance = "DEFENSIVE"
             # is there a shield equipped?
             shields = len([self.items[x] for x in [self.lefthand, self.righthand] if self.items[x].name == "SHIELD"]) #TODO untested
             if shields:
+                self.playerStance = "DEFENSIVE"
                 self.messages.append("You raised your shield!")
+                return True
             else:
                 self.messages.append("You try to raise your shield, only to discover you're not holding one. The {} looks confused.".format(enemy.fancyname))
+                return True # TODO false?
 
         # SWITCHING ITEMS
         elif decision == 'v':
@@ -231,6 +233,8 @@ class Game(object):
                     if len(self.items) > x - 1 and isinstance(self.items[x-1], RangedWeapon):
                         # we can switch to it
                         success = self.equip_both(x)
+                    else:
+                        success = False
 
             else:
                 num = getch()
@@ -239,8 +243,7 @@ class Game(object):
 
                 if num not in range(6):
                     success = False
-                    
-                if hand in [',','<']:
+                elif hand in [',','<']:
                     # player wants to equip left
                     success = self.equip_left(num)
                 else:   
@@ -249,7 +252,7 @@ class Game(object):
             
             # check the results of our equip stage
             if success:
-                playerStance = "NEUTRAL"
+                self.playerStance = "NEUTRAL"
                 self.messages.append("You successfully switched weapons!")
                 return True
             else:
@@ -261,7 +264,6 @@ class Game(object):
             assert(False and "Invalid command specified")
 
     def enemyTurn(self, enemy):
-        print "Enemy turn"
         # enemy will of course hit back
         damage = (enemy.item.strength / 2) * enemy.next_attack
         # player is shielding
@@ -272,9 +274,9 @@ class Game(object):
                 shield_level += self.items[self.lefthand].strength
             if self.items[self.righthand].name == "SHIELD":
                 shield_level += self.items[self.righthand].strength
-        block_chance = shield_level * 0.1 
+        block_chance = shield_level * 0.05 
         event_value = random.uniform(0,1)
-        if block_chance and event_value <= block_chance + 0.5:
+        if block_chance and event_value <= block_chance + 0.75:
             self.messages.append("You successfully blocked the enemy attack!")
         else:
             self.player.damage(damage)
