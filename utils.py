@@ -1,5 +1,5 @@
 
-def new_split(img, img2, width, height):
+def printBattlefield(img, img2, width, height):
     final_image = []
     image = img.split("\n")
     image2 = img2.split("\n")
@@ -13,7 +13,10 @@ def new_split(img, img2, width, height):
         for i in range(height - len(image2)): image2.append("|")
     for i in range(height):
         final_image.append(image[i] + " " * (width + 1 - len(image[i]) - len(image2[i])) + image2[i]) 
-    return final_image
+
+    for line in final_image:
+        print line
+
 
 def printMessageBox(message):
     print "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"

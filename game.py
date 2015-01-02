@@ -17,7 +17,7 @@ class Game(object):
         self.inventory = Inventory()
         self.current_enemy = None
 
-    def miscItemData(self):
+    def _inventoryData(self):
         # returns a list of 14 strings used to populate the bottom-right corner of the war screen
         data = []
         for i in range(14):
@@ -59,7 +59,7 @@ class Game(object):
             if itemlist[i] != None:
                 imagelist.append(getattr(asciiart, itemlist[i].name))
 
-        miscItems = self.miscItemData()
+        miscItems = self._inventoryData()
 
         lines = []
         #lines.append("- " * 80)
@@ -81,13 +81,7 @@ class Game(object):
             print line
 
     def printScreen(self):
-        # extract messages
-        '''
-        mailbox = list()
-        while (messages):
-            mailbox.append(messages.pop(0))
-        message = "\n".join(mailbox)
-        '''
+        # update to remove old messages
         while len(self.messages) > 8:
             self.messages.pop(0)
         message = "\n".join(self.messages)
@@ -95,15 +89,15 @@ class Game(object):
         print
         printMessageBox(message)
         # print battlefield
-        for x in new_split(CHARACTER3, getattr(asciiart, self.current_enemy.name), 162, 15): 
-            print x
+        printBattlefield(CHARACTER3, getattr(asciiart, self.current_enemy.name), 162, 15)
+
         # print info table
         print SCREEN.format(hp=str(self.player.health) + "/100", ehp=str(self.current_enemy.health), estr=str(self.current_enemy.strength))
 
         # print weapons?
         self.printItems()
 
-    def getUserMove(self):
+    def _getUserMove(self):
         self.messages.append("What will you do?")
         self.printScreen()
 
@@ -120,7 +114,7 @@ class Game(object):
         # set environment variables
         self.printScreen()
         self.current_enemy.next_attack = random.randint(1,5)
-        decision = self.getUserMove()
+        decision = self._getUserMove()
         playerDamage = 0
         playerAction = ""
         runs = False
@@ -141,7 +135,10 @@ class Game(object):
             # for non-ranged weapons
             else:
                 # deal the damage
-                playerDamage = sum([self.inventory.get_items()[x].strength for x in [self.inventory.lefthand, self.inventory.righthand] if isinstance(self.inventory.get_items()[x], Weapon) and not isinstance(self.inventory.get_items()[x], Defense)])
+                playerDamage = sum([self.inventory.get_items()[x].strength 
+                                for x in [self.inventory.lefthand, self.inventory.righthand] 
+                                if isinstance(self.inventory.get_items()[x], Weapon)
+                                and not isinstance(self.inventory.get_items()[x], Defense)])
                 playerAction = "hit"
 
             # deal the damage and update
