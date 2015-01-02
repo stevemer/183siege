@@ -1,5 +1,6 @@
 import random
 from weapons import *
+from constants import *
 from enemy_data import enemies, enemy_freqs
 
 def weaponConstructor(weapon):
@@ -28,7 +29,7 @@ class Entity(object):
 
 class Player(Entity):
     def __init__(self):
-        self.health = 100
+        self.health = PLAYER_MAX_HEALTH
 
 class Enemy(Entity):
     def __init__(self):

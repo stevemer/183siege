@@ -163,7 +163,8 @@ class Game(object):
             if self.inventory.miscitems["potions"] > 0:
                 self.playerStance = "NEUTRAL"
                 self.inventory.miscitems["potions"] -= 1
-                self.messages.append("You drank a potion and recovered 25 health!")
+                self.player.health = min(POTION_HEALTH + self.player_health, PLAYER_MAX_HEALTH)
+                self.messages.append("You drank a potion and recovered {} health!".format(POTION_HEALTH))
                 self.printScreen()
                 return True
             else:
@@ -228,7 +229,7 @@ class Game(object):
 
     def enemyTurn(self):
         # enemy will of course hit back
-        damage = int((float(self.current_enemy.item.strength) / 2) * self.current_enemy.next_attack)
+        damage = int((float(self.current_enemy.item.strength) * ENEMY_DAMAGE_CONSTANT) * self.current_enemy.next_attack)
         # player is shielding
         shield_level = 0
         if self.playerStance == "DEFENSIVE":
@@ -237,9 +238,9 @@ class Game(object):
                 shield_level += self.inventory.get_items()[self.inventory.lefthand].strength
             if self.inventory.get_items()[self.inventory.righthand].image == "SHIELD":
                 shield_level += self.inventory.get_items()[self.inventory.righthand].strength
-        block_chance = shield_level * 0.05 
+        block_chance = shield_level * SHIELD_LEVEL_BONUS
         event_value = random.uniform(0,1)
-        if block_chance and event_value <= block_chance + 0.75:
+        if block_chance and event_value <= block_chance + SHIELD_BASE_CHANCE:
             self.messages.append("You successfully blocked the enemy attack!")
         else:
             self.player.damage(damage)
@@ -278,37 +279,38 @@ class Game(object):
             self.current_enemy.image = "DEAD_" + self.current_enemy.image
             self.messages.append("You defeated the {}!".format(self.current_enemy.name) )
             self.printScreen()
-            # drop their weapon? TODO probablity chance that they drop weapon
-            self.messages = ["You defeated the {}!".format(self.current_enemy.name),
-                             "The {0} dropped a {1}...".format(self.current_enemy.name, self.current_enemy.item.name)]
-            self.current_enemy.image = "BLANK_ENEMY"
-            if self.inventory.space_exists():
-                self.messages.append("Would you like to pick it up?")
-                self.printScreen()
-                y_or_n = getch()
-                while y_or_n not in ['y', 'Y', 'n', 'N']:
-                    self.messages.append("Please enter y/n")
+            self.messages = ["You defeated the {}!".format(self.current_enemy.name)]
+            self.printScreen()
+
+            p = random.uniform(0,1)
+            if p <= ITEM_DROP_PROBABILITY:
+                self.messages.append("The {0} dropped a {1}...".format(self.current_enemy.name, self.current_enemy.item.name))
+                self.current_enemy.image = "BLANK_ENEMY"
+                if self.inventory.space_exists():
+                    self.messages.append("Would you like to pick it up?")
                     self.printScreen()
                     y_or_n = getch()
-                if y_or_n in ['y', 'Y']:
-                    # pick up item
-                    self.inventory.add_item(self.current_enemy.item)
+                    while y_or_n not in ['y', 'Y', 'n', 'N']:
+                        self.messages.append("Please enter y/n")
+                        self.printScreen()
+                        y_or_n = getch()
+                    if y_or_n in ['y', 'Y']:
+                        # pick up item
+                        self.inventory.add_item(self.current_enemy.item)
+                        self.printScreen()
+                        time.sleep(2)
+                else:
+                    self.messages.append("Your inventory is full!") #TODO replace items??? maybe, maybe not
                     self.printScreen()
-                    time.sleep(2)
-            else:
-                self.messages.append("Your inventory is full!") #TODO replace items??? maybe, maybe not
-                self.printScreen()
 
         elif self.player.isDead():
-            print "DEFEAT"
-            sys.exit(0)
+            raise Defeat("You have been defeated.")
 
     def checkEvent(self, tile):
         pass
         random.seed()
-        event_probability = 10 / 187.5
         event_value = random.uniform(0,1)
-        if event_value <= event_probability:
+        if event_value <= ENEMY_ENCOUNTER_CHANCE:
             # spawn an enemy TODO generator
             self.current_enemy = self.enemy_factory.generateEnemy()
             self.runEvent()

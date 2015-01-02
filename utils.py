@@ -1,3 +1,6 @@
+from dungeon_generator import getEntrance
+from getch import getch
+import time
 
 def printBattlefield(img, img2, width, height):
     final_image = []
@@ -44,3 +47,31 @@ def printHelpScreen():
     print; print; print
     print "That's not a valid command! ('h' for help) ",
 
+def entranceAnimation():
+    outside = getEntrance()
+    for line in outside:
+        print ''.join(line)
+    print "Press [ENTER] to begin your adventure..."
+    getch()
+    player_x = 30
+    player_y = 79
+    old = outside[player_x][player_y]
+    outside[player_x][player_y] = 'X'
+    for line in outside:
+        print ''.join(line)
+    time.sleep(.5)
+    while (player_x > 14):
+        outside[player_x][player_y] = old
+        player_x -= 1
+        old = outside[player_x][player_y]
+        outside[player_x][player_y] = 'X'
+        for line in outside:
+            print ''.join(line)
+        time.sleep(.25)
+    time.sleep(1)
+    for i in range(22):
+        print
+    print " " * 70 + "Begin"
+    for i in range(22):
+        print
+    time.sleep(2)

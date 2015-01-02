@@ -300,4 +300,4 @@ def getEntrance():
     m.append("                                                                                                                                                                 ")
     m.append("                                                                                                                                                                 ")
     m.append("                                                                                                                                                                 ")
-    return m
+    return [[y for y in x] for x in m]
