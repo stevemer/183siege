@@ -1,3 +1,4 @@
+import sys
 import asciiart
 import random
 from weapons import *
@@ -13,6 +14,7 @@ class Game(object):
         self.items = [MeleeWeapon("SWORD", "Wooden Sword", 1, "Normal"), Defense("SHIELD", "Wooden Shield", 1, "Normal"),
                       MeleeWeapon("SWORD", "Big Sword", 3, "Normal"), Defense("SHIELD", "Big Shield", 3, "Normal"),
                       RangedWeapon("BOW", "Super Bow", 3, "Ice")]
+        self.miscitems = {"potions": 5, "keys": 0, "trinkets": 0}
         self.lefthand = 0
         self.righthand = 1 #TODO will cause probs if less than 2 items held
 
@@ -77,9 +79,9 @@ class Game(object):
         data[9] = ("Left Hand: {}".format(self.lefthand + 1))    
         data[10] = ("Right Hand: {}".format(self.righthand + 1))    
 
-        data[11] = ("Potions: {}".format(9)) # num potions store in game #TODO
-        data[12] = ("Keys: {}".format(3)) # num keys in game #TODO
-        data[13] = ("Trinkets: {}".format(2)) # num trinkets
+        data[11] = ("Potions: {}".format(self.miscitems['potions'])) # num potions store in game #TODO
+        data[12] = ("Keys: {}".format(self.miscitems['keys'])) # num keys in game #TODO
+        data[13] = ("Trinkets: {}".format(self.miscitems['trinkets'])) # num trinkets
         return data
 
     def printItems(self, enemy): #TODO: list enemy weapon in case we want it?
@@ -151,12 +153,12 @@ class Game(object):
         self.messages.append("What will you do?")
         self.printScreen(enemy, self.messages)
 
-        print "What will you do? (Attack: 'x', Shield: 'c', Switch Weapons: 'v + </> + 1/2/3/4/5/6' to equip weapon # in hand </>): ",
+        print "What will you do? ('h' for help)",
         decision = getch()
-        while decision not in ['x', 'c', 'v']:
+        while decision not in ['x', 'c', 'v', 'i']:
             self.messages.append("That's not a valid command - what will you do?")
             self.printScreen(enemy, self.messages)
-            print "That's not a valid command! (Attack: 'x', Shield: 'c', Switch Weapons: 'v + </> + 1/2/3/4/5/6' to equip weapon # in hand </>) ",
+            print "That's not a valid command! ('h' for help) ",
             decision = getch()
         return decision
 
@@ -202,10 +204,15 @@ class Game(object):
         
         # ITEMS
         elif decision == 'i':
-            self.playerStance = "NEUTRAL"
-            # using items TODO
-            print "You can't drink a potion now!"
-            return False
+            if self.miscitems["potions"] > 0:
+                self.playerStance = "NEUTRAL"
+                self.miscitems["potions"] -= 1
+                self.messages.append("You drank a potion and recovered 25 health!")
+                self.printScreen(enemy, self.messages)
+                return True
+            else:
+                self.messages.append("You don't have any potions!")
+                return False
 
         # SHIELDING
         elif decision == 'c':
@@ -297,11 +304,9 @@ class Game(object):
             # Player's move
             if isPlayerTurn:
                 success = self.playerTurn(enemy)
-
             # Enemy's move
             else:
                 success = self.enemyTurn(enemy)
-
             # update
             self.printScreen(enemy, self.messages)
 
@@ -317,7 +322,26 @@ class Game(object):
             enemy.name = "DEAD_" + enemy.name
             self.messages.append("You defeated the enemy {}!".format(enemy.fancyname) )
             self.printScreen(enemy, self.messages)
-            time.sleep(2)
+            # drop their weapon? TODO probablity chance that they drop weapon
+            self.messages = ["You defeated the enemy {}!".format(enemy.fancyname),
+                             "The {0} dropped a {1}...".format(enemy.fancyname, enemy.item.fancyname)]
+            enemy.name = "BLANK_ENEMY"
+            if self.space_exists():
+                self.messages.append("Would you like to pick it up?")
+                self.printScreen(enemy, self.messages)
+                y_or_n = getch()
+                while y_or_n not in ['y', 'Y', 'n', 'N']:
+                    self.messages.append("Please enter y/n")
+                    self.printScreen(enemy, self.messages)
+                    y_or_n = getch()
+                if y_or_n in ['y', 'Y']:
+                    # pick up item
+                    self.add_item(enemy.item)
+                    self.printScreen(enemy, self.messages)
+                    time.sleep(2)
+            else:
+                self.messages.append("Your inventory is full!") #TODO replace items??? maybe, maybe not
+                self.printScreen(enemy, self.messages)
 
         elif self.player.isDead():
             print "DEFEAT"
