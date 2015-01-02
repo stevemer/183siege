@@ -94,7 +94,7 @@ class Game(object):
         # print battlefield
         printBattlefield(CHARACTER3, getattr(asciiart, self.current_enemy.image), 162, 15)
         # print info bar
-        print SCREEN.format(hp=str(self.player.health) + "/100", ehp=str(self.current_enemy.health), estr=str("NONE"))
+        print SCREEN.format(hp=str(self.player.health) + "/100", ehp=str(self.current_enemy.health))
         # print equipment and items
         self.printItems()
 
@@ -109,6 +109,10 @@ class Game(object):
             self.printScreen()
             print "That's not a valid command! ('h' for help) ",
             decision = getch()
+
+            if decision == 'h':
+                printHelpScreen()
+                decision = getch()
         return decision
 
     def playerTurn(self):

@@ -28,3 +28,19 @@ def printMessageBox(message):
             print "| {:80s}                                                                                |".format("")
     print "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 
+def printHelpScreen():
+    for i in range(45):
+        print
+    print "HELP SCREEN:"
+    print "Movement: WASD"
+    print "Battle:"
+    print "\tx - Attack"
+    print "\tc - Raise Shield"
+    print "\ti - Use Potion"
+    print "\tv - Begin Switching Weapons"
+    print "\t\t< - Select Left Hand (while switching weapons)"
+    print "\t\t>  - Select Right Hand (while switching weapons)"
+    print "\t\t\t Finally, press any number key to select a weapons slot to use."
+    print; print; print
+    print "That's not a valid command! ('h' for help) ",
+
