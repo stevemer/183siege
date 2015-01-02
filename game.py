@@ -23,16 +23,16 @@ class Game(object):
         for i in range(14):
             data.append("") 
         data[0] = "Type: {}".format(self.current_enemy.fancyname)
-        data[1] = "Element: {}".format(self.current_enemy.element)
-        data[2] = "Weapon: {}".format(self.current_enemy.item.fancyname)
-        data[3] = "Next Attack: {}".format(STRENGTHNAMES[self.current_enemy.next_attack])
-        data[4] = "- " * 26
-        data[6] = "EQUIPMENT"
+        #data[1] = "Element: {}".format(self.current_enemy.element)
+        data[1] = "Weapon: {}".format(self.current_enemy.item.fancyname)
+        data[2] = "Next Attack: {}".format(STRENGTHNAMES[self.current_enemy.next_attack])
+        data[3] = "- " * 26
+        data[4] = "Equipment"
         
-        data[7] = ("Left Hand: {}".format(self.inventory.lefthand + 1))    
-        data[8] = ("Right Hand: {}".format(self.inventory.righthand + 1))    
-        data[9] = "- " * 26
-        data[10] = "INVENTORY"
+        data[6] = ("Left Hand: {}".format(self.inventory.lefthand + 1))    
+        data[7] = ("Right Hand: {}".format(self.inventory.righthand + 1))    
+        data[8] = "- " * 26
+        data[9] = "INVENTORY"
         data[11] = ("Potions: {}".format(self.inventory.miscitems['potions'])) # num potions store in game #TODO
         data[12] = ("Keys: {}".format(self.inventory.miscitems['keys'])) # num keys in game #TODO
         data[13] = ("Trinkets: {}".format(self.inventory.miscitems['trinkets'])) # num trinkets
@@ -63,7 +63,7 @@ class Game(object):
 
         lines = []
         #lines.append("- " * 80)
-        lines.append("| 1." + " " * 32 + "| 2." + " " * 32 + "| 3." + " " * 32 + "| enemy   " + " " * 44 + "|")
+        lines.append("| 1." + " " * 32 + "| 2." + " " * 32 + "| 3." + " " * 32 + "| Enemy   " + " " * 44 + "|")
         for i in range(6):
             lines.append("| " + ("{:18s}".format(str(iteminfo[0][i])) if itemlist[0] else " " * 18) + (imagelist[0].split("\n")[i] if itemlist[0] else " " * 16)
                        + "| " + ("{:18s}".format(str(iteminfo[1][i])) if itemlist[1] else " " * 18) + (imagelist[1].split("\n")[i] if itemlist[1] else " " * 16)
