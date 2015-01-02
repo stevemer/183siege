@@ -6,25 +6,24 @@ class Item(object):
         raise GenericItemSelection()
 
 class Weapon(Item):
-    def __init__(self, name, fancyname, strength, element):
+    def __init__(self, image, name, strength):
         # later: kwargs
+        self.image = image
         self.name = name
         self.strength = strength
-        self.element = element 
-        self.fancyname = fancyname
 
 class MeleeWeapon(Weapon):
-    def __init__(self, name, fancyname,  strength, element):
-        super(MeleeWeapon, self).__init__(name, fancyname, strength, element)
+    def __init__(self, image, name,  strength):
+        super(MeleeWeapon, self).__init__(image, name, strength)
         pass
 
 class RangedWeapon(Weapon):
-    def __init__(self, name, fancyname, strength, element):
-        super(RangedWeapon, self).__init__(name, fancyname, strength, element)
+    def __init__(self, image, name, strength):
+        super(RangedWeapon, self).__init__(image, name, strength)
         pass
 
 class Defense(Weapon):
-    def __init__(self, name, fancyname, strength, element):
-        super(Defense, self).__init__(name, fancyname, strength, element)
+    def __init__(self, image, name, strength):
+        super(Defense, self).__init__(image, name, strength)
         pass
 

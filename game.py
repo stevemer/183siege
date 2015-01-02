@@ -2,7 +2,7 @@ import sys
 import asciiart
 import random
 from weapons import *
-from entities import Player, Enemy
+from entities import Player, Enemy, EnemyFactory
 from maps import *
 from utils import *
 from maps import *
@@ -12,9 +12,11 @@ from getch import getch
 
 class Game(object):
     def __init__(self):
-        self.player = Player()
         self.map = Map()
+        self.player = Player()
         self.inventory = Inventory()
+        self.enemy_factory = EnemyFactory()
+
         self.current_enemy = None
 
     def _inventoryData(self):
@@ -22,9 +24,9 @@ class Game(object):
         data = []
         for i in range(14):
             data.append("") 
-        data[0] = "Type: {}".format(self.current_enemy.fancyname)
+        data[0] = "Type: {}".format(self.current_enemy.name)
         #data[1] = "Element: {}".format(self.current_enemy.element)
-        data[1] = "Weapon: {}".format(self.current_enemy.item.fancyname)
+        data[1] = "Weapon: {}".format(self.current_enemy.item.name)
         data[2] = "Next Attack: {}".format(STRENGTHNAMES[self.current_enemy.next_attack])
         data[3] = "- " * 26
         data[4] = "Equipment"
@@ -49,7 +51,7 @@ class Game(object):
         iteminfo = []
         for item in itemlist:
             if item != None:
-                itemdata = [item.fancyname, item.strength, item.element, "", "", ""]
+                itemdata = [item.name, item.strength, "", "", "", ""] # replaced [2] with item.element to ""
                 iteminfo.append(itemdata)
             else:
                 iteminfo.append(None)
@@ -57,7 +59,7 @@ class Game(object):
         imagelist = []
         for i in range(6):
             if itemlist[i] != None:
-                imagelist.append(getattr(asciiart, itemlist[i].name))
+                imagelist.append(getattr(asciiart, itemlist[i].image))
 
         miscItems = self._inventoryData()
 
@@ -87,14 +89,13 @@ class Game(object):
         message = "\n".join(self.messages)
 
         print
+        # print the message box
         printMessageBox(message)
         # print battlefield
-        printBattlefield(CHARACTER3, getattr(asciiart, self.current_enemy.name), 162, 15)
-
-        # print info table
-        print SCREEN.format(hp=str(self.player.health) + "/100", ehp=str(self.current_enemy.health), estr=str(self.current_enemy.strength))
-
-        # print weapons?
+        printBattlefield(CHARACTER3, getattr(asciiart, self.current_enemy.image), 162, 15)
+        # print info bar
+        print SCREEN.format(hp=str(self.player.health) + "/100", ehp=str(self.current_enemy.health), estr=str("NONE"))
+        # print equipment and items
         self.printItems()
 
     def _getUserMove(self):
@@ -143,10 +144,10 @@ class Game(object):
 
             # deal the damage and update
             self.current_enemy.damage(playerDamage)
-            self.messages.append("You {0} the {1} for {2} damage!".format(playerAction, self.current_enemy.fancyname, playerDamage))
+            self.messages.append("You {0} the {1} for {2} damage!".format(playerAction, self.current_enemy.name, playerDamage))
             print "HIT"
             if runs and not self.current_enemy.isDead():
-                self.messages.append("The {} runs closer to you...".format(self.current_enemy.fancyname))
+                self.messages.append("The {} runs closer to you...".format(self.current_enemy.name))
 
             # if the self.current_enemy ran towards us, we can take another turn for free
             if runs and not self.player.isDead() and not self.current_enemy.isDead():
@@ -168,13 +169,13 @@ class Game(object):
         # SHIELDING
         elif decision == 'c':
             # is there a shield equipped?
-            shields = len([self.inventory.get_items()[x] for x in [self.inventory.lefthand, self.inventory.righthand] if self.inventory.get_items()[x].name == "SHIELD"]) #TODO untested
+            shields = len([self.inventory.get_items()[x] for x in [self.inventory.lefthand, self.inventory.righthand] if self.inventory.get_items()[x].image == "SHIELD"]) #TODO untested
             if shields:
                 self.playerStance = "DEFENSIVE"
                 self.messages.append("You raised your shield!")
                 return True
             else:
-                self.messages.append("You try to raise your shield, only to discover you're not holding one. The {} looks confused.".format(self.current_enemy.fancyname))
+                self.messages.append("You try to raise your shield, only to discover you're not holding one. The {} looks confused.".format(self.current_enemy.name))
                 return True # TODO false?
 
         # SWITCHING ITEMS
@@ -223,14 +224,14 @@ class Game(object):
 
     def enemyTurn(self):
         # enemy will of course hit back
-        damage = (self.current_enemy.item.strength / 2) * self.current_enemy.next_attack
+        damage = int((float(self.current_enemy.item.strength) / 2) * self.current_enemy.next_attack)
         # player is shielding
         shield_level = 0
         if self.playerStance == "DEFENSIVE":
             # find the shields the player has
-            if self.inventory.get_items()[self.inventory.lefthand].name == "SHIELD": #TODO type defnsive
+            if self.inventory.get_items()[self.inventory.lefthand].image == "SHIELD": #TODO type defnsive
                 shield_level += self.inventory.get_items()[self.inventory.lefthand].strength
-            if self.inventory.get_items()[self.inventory.righthand].name == "SHIELD":
+            if self.inventory.get_items()[self.inventory.righthand].image == "SHIELD":
                 shield_level += self.inventory.get_items()[self.inventory.righthand].strength
         block_chance = shield_level * 0.05 
         event_value = random.uniform(0,1)
@@ -238,13 +239,13 @@ class Game(object):
             self.messages.append("You successfully blocked the enemy attack!")
         else:
             self.player.damage(damage)
-            self.messages.append("The {0} hits you for {1} damage!".format(self.current_enemy.fancyname, damage))
+            self.messages.append("The {0} hits you for {1} damage!".format(self.current_enemy.name, damage))
         return True
 
     def runEvent(self):
         # Combat loop
         isPlayerTurn = True
-        self.messages = ["A {} appeared!".format(self.current_enemy.fancyname)] #TODO verbage
+        self.messages = ["A {} appeared!".format(self.current_enemy.name)] #TODO verbage
         self.playerStance = "NEUTRAL"
         self.bowTurns = 1
         success = True
@@ -270,13 +271,13 @@ class Game(object):
         
         # someone died
         if self.current_enemy.isDead():
-            self.current_enemy.name = "DEAD_" + self.current_enemy.name
-            self.messages.append("You defeated the {}!".format(self.current_enemy.fancyname) )
+            self.current_enemy.image = "DEAD_" + self.current_enemy.image
+            self.messages.append("You defeated the {}!".format(self.current_enemy.name) )
             self.printScreen()
             # drop their weapon? TODO probablity chance that they drop weapon
-            self.messages = ["You defeated the {}!".format(self.current_enemy.fancyname),
-                             "The {0} dropped a {1}...".format(self.current_enemy.fancyname, self.current_enemy.item.fancyname)]
-            self.current_enemy.name = "BLANK_ENEMY"
+            self.messages = ["You defeated the {}!".format(self.current_enemy.name),
+                             "The {0} dropped a {1}...".format(self.current_enemy.name, self.current_enemy.item.name)]
+            self.current_enemy.image = "BLANK_ENEMY"
             if self.inventory.space_exists():
                 self.messages.append("Would you like to pick it up?")
                 self.printScreen()
@@ -305,7 +306,7 @@ class Game(object):
         event_value = random.uniform(0,1)
         if event_value <= event_probability:
             # spawn an enemy TODO generator
-            self.current_enemy = Enemy()
+            self.current_enemy = self.enemy_factory.generateEnemy()
             self.runEvent()
 
     def move(self, direction):
