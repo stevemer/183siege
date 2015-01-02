@@ -11,7 +11,8 @@ class Game(object):
     def __init__(self):
         self.player = Player()
         self.items = [MeleeWeapon("SWORD", "Wooden Sword", 1, "Normal"), Defense("SHIELD", "Wooden Shield", 1, "Normal"),
-                      MeleeWeapon("SWORD", "Big Sword", 3, "Normal"), Defense("SHIELD", "Big Shield", 3, "Normal")]
+                      MeleeWeapon("SWORD", "Big Sword", 3, "Normal"), Defense("SHIELD", "Big Shield", 3, "Normal"),
+                      RangedWeapon("BOW", "Super Bow", 3, "Ice")]
         self.lefthand = 0
         self.righthand = 1 #TODO will cause probs if less than 2 items held
 
@@ -26,6 +27,15 @@ class Game(object):
         if num >= len(self.items):
             return False       
         self.lefthand = num 
+        return True
+
+    def equip_both(self, num):
+        num -= 1
+        if self.righthand == num or self.lefthand == num:
+            return False
+        if num >= len(self.items):
+            return False       
+        self.righthand = self.lefthand = num
         return True
 
     def equip_right(self, num):
@@ -114,7 +124,18 @@ class Game(object):
         for line in lines:
             print line
 
-    def printScreen(self, enemy, message):
+    def printScreen(self, enemy, messages):
+        # extract messages
+        '''
+        mailbox = list()
+        while (messages):
+            mailbox.append(messages.pop(0))
+        message = "\n".join(mailbox)
+        '''
+        while len(messages) > 10:
+            messages.pop(0)
+        message = "\n".join(messages)
+
         print
         printMessageBox(message)
         # print battlefield
@@ -126,110 +147,167 @@ class Game(object):
         # print weapons?
         self.printItems(enemy)
 
+    def playerTurn(self, enemy):
+        # set environment variables
+        enemy.next_attack = random.randint(1,5)
+        self.messages.append("What will you do?")
+
+        self.printScreen(enemy, self.messages)
+
+        print "What will you do? (Attack: 'x', Shield: 'c', Switch Weapons: 'v + </> + 1/2/3/4/5/6' to equip weapon # in hand </>): ",
+        decision = getch()
+        while decision not in ['x', 'c', 'v']:
+            self.messages.append("What will you do?")
+            self.printScreen(enemy, self.messages)
+            print "That's not a valid command! (Attack: 'x', Shield: 'c', Switch Weapons: 'v + </> + 1/2/3/4/5/6' to equip weapon # in hand </>) ",
+            decision = getch()
+
+        if decision == 'x':
+            if isinstance(self.items[self.lefthand], RangedWeapon):
+                playerStance = "OFFENSIVE"
+                playerDamage = self.items[self.lefthand].strength
+                enemy.damage(playerDamage)
+                if self.bowTurns:
+                    isPlayerTurn = False # reset turns so that we get another turn immediately
+                    self.bowTurns -= 1
+                    self.messages.append("You shoot the enemy Goblin for {} damage!\nIt runs closer to you.".format(playerDamage))
+                    self.printScreen(enemy, self.messages)
+                else:
+                    self.messages.append("You shoot the enemy Goblin for {} damage!".format(playerDamage))
+                    self.printScreen(enemy, self.messages)
+            else:
+                playerStance = "OFFENSIVE"
+                playerDamage = sum([self.items[x].strength for x in [self.lefthand, self.righthand] if isinstance(self.items[x], Weapon) and not isinstance(self.items[x], Defense)])
+                enemy.damage(playerDamage)
+                self.messages.append("You hit the enemy Goblin for {} damage!".format(playerDamage))
+                self.printScreen(enemy, self.messages)
+        
+        # for if we use items
+        elif decision == 'i':
+            playerStance = "NEUTRAL"
+            # using items
+            print "You can't drink a potion now!"
+            return False
+
+        elif decision == 'c':
+            playerStance = "DEFENSIVE"
+            # is there a shield equipped?
+            shields = len([self.items[x] for x in [self.lefthand, self.righthand] if self.items[x].name == "SHIELD"]) #TODO untested
+            if shields:
+                self.messages.append("You raised your shield!")
+                self.printScreen(enemy, self.messages)
+            else:
+                self.messages.append("You try to raise your shield, only to discover you're not holding one. The {} looks confused.".format(enemy.fancyname))
+                self.printScreen(enemy, self.messages)
+        elif decision == 'v':
+            playerStance = "NEUTRAL"
+            hand = getch()
+            if hand not in [',','.','<','>']:
+                # user wants to equip a bow, so both hands will be used.
+                try:
+                    x = int(hand)
+                    if len(self.items) > x - 1 and isinstance(self.items[x-1], RangedWeapon):
+                        # we can switch to it
+                        if self.equip_both(x):
+                            self.messages.append("You successfully switched weapons!")
+                            self.printScreen(enemy, self.messages)
+                            return True
+                        else:
+                            self.messages.append("You can't switch to that weapon!")
+                            self.printScreen(enemy, self.messages)
+                            return False
+                    else:
+                        raise TypeError
+                        
+                except TypeError:
+                    self.messages.append("You can't switch to that weapon!")
+                    self.printScreen(enemy, self.messages)
+                    return False
+
+            else:
+                num = int(getch())
+                if num not in range(6):
+                    self.messages.append("You can't switch to that weapon!")
+                    self.printScreen(enemy, self.messages)
+                    return False
+                    
+                if hand in [',','<']:
+                    # player wants to equip left
+                    if self.equip_left(num):
+                        self.messages.append("You successfully switched weapons!")
+                        self.printScreen(enemy, self.messages)
+                    else:
+                        self.messages.append("You can't switch to that weapon!")
+                        self.printScreen(enemy, self.messages)
+                        return False
+                else:   
+                    # player wants to equip right
+                    if self.equip_right(num):
+                        self.messages.append("You successfully switched weapons!")
+                        self.printScreen(enemy, self.messages)
+                    else:
+                        self.messages.append("You can't switch to that weapon!")
+                        self.printScreen(enemy, self.messages)
+                        return False
+        else:
+            assert(False and "Invalid command specified")
+        return True
+
+    def enemyTurn(self, enemy):
+        # enemy will of course hit back
+        damage = (enemy.item.strength / 2) * enemy.next_attack
+        # player is shielding
+        shield_level = 0
+        if self.playerStance == "DEFENSIVE":
+            # find the shields the player has
+            if self.items[self.lefthand].name == "SHIELD": #TODO type defnsive
+                shield_level += self.items[self.lefthand].strength
+            if self.items[self.righthand].name == "SHIELD":
+                shield_level += self.items[self.righthand].strength
+        block_chance = shield_level * 0.1 
+        event_value = random.uniform(0,1)
+        if block_chance and event_value <= block_chance + 0.5:
+            self.messages.append("You successfully blocked the enemy attack!")
+            self.printScreen(enemy, self.messages)
+        else:
+            self.player.damage(damage)
+            self.messages.append("The enemy {0} hits you for {1} damage!".format(enemy.fancyname, damage))
+            self.printScreen(enemy, self.messages)
+        pass
+        return True
+
     def runEvent(self, enemy):
         # Combat loop
         isPlayerTurn = True
-
-        self.printScreen(enemy, "An enemy {} appeared!".format(enemy.fancyname))
-        playerStance = "NEUTRAL"
+        self.messages = ["An enemy {} appeared!".format(enemy.fancyname)]
+        self.playerStance = "NEUTRAL"
+        self.bowTurns = 1
     
         while not enemy.isDead() and not self.player.isDead():
+
             # Player's move
             if isPlayerTurn:
-                enemy.next_attack = random.randint(1,5)
-
-                self.printScreen(enemy, "What will you do?")
-
-                print "What will you do? (Attack: 'x', Shield: 'c', Switch Weapons: 'v + </> + 1/2/3/4/5/6' to equip weapon # in hand </>): ",
-                decision = getch()
-                while decision not in ['x', 'c', 'v']:
-                    self.printScreen(enemy, "What will you do?")
-                    print "That's not a valid command! (Attack: 'x', Shield: 'c', Switch Weapons: 'v + </> + 1/2/3/4/5/6' to equip weapon # in hand </>) ",
-                    decision = getch()
-
-                message = "No action taken"
-                if decision == 'x':
-                    playerStance = "OFFENSIVE"
-                    playerDamage = sum([self.items[x].strength for x in [self.lefthand, self.righthand] if isinstance(self.items[x], Weapon) and not isinstance(self.items[x], Defense)])
-                    print "total player damage: {}".format(playerDamage)
-                    enemy.damage(playerDamage)
-                    self.printScreen(enemy, "You hit the enemy Goblin for {} damage!".format(playerDamage))
-                
-                # for if we use items
-                elif decision == 'i':
-                    playerStance = "NEUTRAL"
-                    # using items
-                    print "You can't drink a potion now!"
-                    decision = '?'
+                result = self.playerTurn(enemy)
+                if not result:
+                    # if the user action failed, retry
                     continue
-    
-                elif decision == 'c':
-                    playerStance = "DEFENSIVE"
-                    # is there a shield equipped?
-                    shields = len([self.items[x] for x in [self.lefthand, self.righthand] if self.items[x].name == "SHIELD"]) #TODO untested
-                    if shields:
-                        self.printScreen(enemy, "You raised your shield!")
-                    else:
-                        self.printScreen(enemy, "You try to raise your shield, only to discover you're not holding one. The {} looks confused.".format(enemy.fancyname))
-                elif decision == 'v':
-                    playerStance = "NEUTRAL"
-                    hand = getch()
-                    num = int(getch())
-                    if hand not in [',','.','<','>'] or num not in range(6):
-                        decision = '?'
-                        continue
 
-                    if hand in [',','<']:
-                        # player wants to equip left
-                        if self.equip_left(num):
-                            self.printScreen(enemy, "You successfully switched weapons")
-                            time.sleep(1)
-                            decision = '?'
-                            continue
-                        else:
-                            self.printScreen(enemy, "You can't switch to that weapon!")
-                            time.sleep(1)
-                            decision = '?'
-                            continue
-                    else:   
-                        # player wants to equip right
-                        if self.equip_right(num):
-                            self.printScreen(enemy, "You successfully switched weapons")
-                        else:
-                            self.printScreen(enemy, "You can't switch to that weapon!")
-                else:
-                    assert(False and "Invalid command specified")
-                time.sleep(2)
             # Enemy's move
             else:
-                # enemy will of course hit back
-                damage = (enemy.item.strength / 2) * enemy.next_attack
-                # player is shielding
-                shield_level = 0
-                if playerStance == "DEFENSIVE":
-                    print "in defensive"
-                    # find the shields the player has
-                    if self.items[self.lefthand].name == "SHIELD": #TODO type defnsive
-                        shield_level += self.items[self.lefthand].strength
-                    if self.items[self.righthand].name == "SHIELD":
-                        shield_level += self.items[self.righthand].strength
-                block_chance = shield_level * 0.1 
-                event_value = random.uniform(0,1)
-                if block_chance and event_value <= block_chance + 0.5:
-                    self.printScreen(enemy, "You successfully blocked the enemy attack!")
-                else:
-                    self.player.damage(damage)
-                    self.printScreen(enemy, "The enemy {0} hits you for {1} damage!".format(enemy.fancyname, damage))
+                result = self.enemyTurn(enemy)
+                if not result:
+                    continue
 
-                pass
+            # Bow is only useful on the first turn
+            if self.bowTurns: self.bowTurns -= 1
             # Change whose turn it is
             isPlayerTurn = False if isPlayerTurn else True
-            pass
         
         # someone died
         if enemy.isDead():
             enemy.name = "DEAD_" + enemy.name
-            self.printScreen(enemy, "You defeated the enemy {}!".format(enemy.fancyname))
+            self.messages.append("You defeated the enemy {}!".format(enemy.fancyname) )
+            self.printScreen(enemy, self.messages)
             time.sleep(2)
 
         elif self.player.isDead():
