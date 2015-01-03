@@ -1,11 +1,21 @@
+#####################################
+# Enable/Disable student AI 
+#####################################
+
+USE_AI = False
+
+#####################################
+# Game mechanics and const globals 
+#####################################
+
+# Map ratios
 MAP_WIDTH = 80
 MAP_HEIGHT = 38
-
 VISIBLE_TILES = ['X', ' ', '@']
 
+# Globals
 RIGHT_HAND = 1
 LEFT_HAND = 0
-
 STRENGTHNAMES = {
     0: "",
     1: "Very Weak",
@@ -14,12 +24,6 @@ STRENGTHNAMES = {
     4: "Strong",
     5: "Very Strong"
 }
-
-class Defeat(Exception):
-    pass
-
-class Victory(Exception):
-    pass
 
 #####################################
 # Probabilities and balancing factors
@@ -38,7 +42,17 @@ SHIELD_LEVEL_BONUS = 0.05
 
 # Event Probabilities
 ITEM_DROP_PROBABILITY = 0.5
-ENEMY_ENCOUNTER_CHANCE = 10 / 187.5 #TBT, should be 5 though...
+ENEMY_ENCOUNTER_CHANCE = 10 / 187.5
 
 # Health
 PLAYER_MAX_HEALTH = 100
+
+#####################################
+# Custom game exceptions 
+#####################################
+
+class Defeat(Exception):
+    pass
+
+class Victory(Exception):
+    pass

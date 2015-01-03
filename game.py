@@ -8,7 +8,7 @@ from utils import *
 from maps import *
 from inventory import Inventory
 from getch import getch
-
+from ai import makeMove
 
 class Game(object):
     def __init__(self):
@@ -18,6 +18,39 @@ class Game(object):
         self.enemy_factory = EnemyFactory()
 
         self.current_enemy = None
+        self.level = 0
+
+    def levelUp(self):
+        self.level += 1
+
+    def getDataForAI(self, moveType):
+        return {
+            "decision": moveType,
+            "enemy": None if not self.current_enemy else {
+                "name": self.current_enemy.name,
+                "health": self.current_enemy.health,
+                "item": {
+                    "type": self.current_enemy.item.image,
+                    "name": self.current_enemy.item.name,
+                    "strength": self.current_enemy.item.strength,
+                },
+                "next_attack:": STRENGTHNAMES[self.current_enemy.next_attack],
+            },
+            "player": {
+                "health": self.player.health,
+            },
+            "inventory": {
+                "items": [{
+                    "type": x.image,
+                    "name": x.name,
+                    "strength": x.strength,
+                } for x in self.inventory.items],
+                "misc": self.inventory.miscitems,
+                "left_equipped": self.inventory.lefthand + 1,
+                "right_equipped": self.inventory.righthand + 1,
+            },
+            "level": self.level,
+        }
 
     def _inventoryData(self):
         # returns a list of 14 strings used to populate the bottom-right corner of the war screen
@@ -103,29 +136,29 @@ class Game(object):
         self.printScreen()
 
         print "What will you do? ('h' for help)",
-        decision = getch()
-        while decision not in ['x', 'c', 'v', 'i']:
+        decision = makeMove(self.getDataForAI("ATTACK"))
+        while decision[0] not in ['x', 'c', 'v', 'i']:
             self.messages.append("That's not a valid command - what will you do?")
             self.printScreen()
             print "That's not a valid command! ('h' for help) ",
-            decision = getch()
+            decision = makeMove(self.getDataForAI("ATTACK"))
 
             if decision == 'h':
                 printHelpScreen()
-                decision = getch()
+                decision = makeMove(self.getDataForAI("ATTACK"))
         return decision
 
     def playerTurn(self):
         # set environment variables
         self.printScreen()
         self.current_enemy.next_attack = random.randint(1,5)
-        decision = self._getUserMove()
+        decisions = [x for x in self._getUserMove()]
         playerDamage = 0
         playerAction = ""
         runs = False
 
         # ATTACKING
-        if decision == 'x':
+        if decisions[0] == 'x':
             self.playerStance = "OFFENSIVE"
             # are we attacking with a ranged weapon?
             if isinstance(self.inventory.get_items()[self.inventory.lefthand], RangedWeapon):
@@ -159,7 +192,7 @@ class Game(object):
             return True
         
         # ITEMS
-        elif decision == 'i':
+        elif decisions[0] == 'i':
             if self.inventory.miscitems["potions"] > 0:
                 self.playerStance = "NEUTRAL"
                 self.inventory.miscitems["potions"] -= 1
@@ -172,7 +205,7 @@ class Game(object):
                 return False
 
         # SHIELDING
-        elif decision == 'c':
+        elif decisions[0] == 'c':
             # is there a shield equipped?
             shields = len([self.inventory.get_items()[x] for x in [self.inventory.lefthand, self.inventory.righthand] if self.inventory.get_items()[x].image == "SHIELD"]) #TODO untested
             if shields:
@@ -184,9 +217,9 @@ class Game(object):
                 return True # TODO false?
 
         # SWITCHING ITEMS
-        elif decision == 'v':
+        elif decisions[0] == 'v':
             success = True
-            hand = getch()
+            hand = decisions[1] if USE_AI else getch()
             if hand not in [',','.','<','>']:
                 try:
                     x = int(hand)
@@ -201,7 +234,7 @@ class Game(object):
                         success = False
 
             else:
-                num = getch()
+                num = decisions[2] if USE_AI else getch()
                 try: num = int(num)
                 except: success = False
 
@@ -289,11 +322,63 @@ class Game(object):
                 if self.inventory.space_exists():
                     self.messages.append("Would you like to pick it up?")
                     self.printScreen()
-                    y_or_n = getch()
+                    y_or_n = makeMove({
+                        "decision": "ITEM",
+                        "enemy": {
+                            "name": self.current_enemy.name,
+                            "health": self.current_enemy.health,
+                            "item": {
+                                "type": self.current_enemy.item.image,
+                                "name": self.current_enemy.item.name,
+                                "strength": self.current_enemy.item.strength,
+                            },
+                            "next_attack:": STRENGTHNAMES[self.current_enemy.next_attack],
+                        },
+                        "player": {
+                            "health": self.player.health,
+                        },
+                        "inventory": {
+                            "items": [{
+                                "type": x.image,
+                                "name": x.name,
+                                "strength": x.strength,
+                            } for x in self.items],
+                            "misc": self.miscitems,
+                            "left_equipped": self.lefthand + 1,
+                            "right_equipped": self.righthand + 1,
+                        },
+                        "level": self.level,
+                    })
                     while y_or_n not in ['y', 'Y', 'n', 'N']:
                         self.messages.append("Please enter y/n")
                         self.printScreen()
-                        y_or_n = getch()
+                        y_or_n = makeMove({
+                            "decision": "ITEM",
+                            "enemy": {
+                                "name": self.current_enemy.name,
+                                "health": self.current_enemy.health,
+                                "item": {
+                                    "type": self.current_enemy.item.image,
+                                    "name": self.current_enemy.item.name,
+                                    "strength": self.current_enemy.item.strength,
+                                },
+                                "next_attack:": STRENGTHNAMES[self.current_enemy.next_attack],
+                            },
+                            "player": {
+                                "health": self.player.health,
+                            },
+                            "inventory": {
+                                "items": [{
+                                    "type": x.image,
+                                    "name": x.name,
+                                    "strength": x.strength,
+                                } for x in self.items],
+                                "misc": self.miscitems,
+                                "left_equipped": self.lefthand + 1,
+                                "right_equipped": self.righthand + 1,
+                            },
+                            "level": self.level,
+                        })
                     if y_or_n in ['y', 'Y']:
                         # pick up item
                         self.inventory.add_item(self.current_enemy.item)
