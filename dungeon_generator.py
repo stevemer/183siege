@@ -273,7 +273,7 @@ def getEntrance():
     m.append("                                                            OOOOOOOOOOOOOOOOO#___#OOOOOOOOOOOOOOOOO                                                              ")
     m.append("                                                                            O#___#O                                                                              ")
     m.append("                                                                            O_____O                                                                              ")
-    m.append("                                                                   /\\     O_________O    /\\                                                                      ")
+    m.append("                                                                   /\\     O_________O     /\\                                                                      ")
     m.append("                                                                   ||   O_____________O   ||                                                                     ")
     m.append("                                                                   || O_________________O ||                                                                     ")
     m.append("                                                                   ||_____________________||                                                                     ")

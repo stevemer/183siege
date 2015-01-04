@@ -46,8 +46,8 @@ class Game(object):
                     "strength": x.strength,
                 } for x in self.inventory.items],
                 "misc": self.inventory.miscitems,
-                "left_equipped": self.inventory.lefthand + 1,
-                "right_equipped": self.inventory.righthand + 1,
+                "left_equipped": self.inventory.lefthand + 1 if self.inventory.lefthand else None,
+                "right_equipped": self.inventory.righthand + 1 if self.inventory.righthand else None,
             },
             "level": self.level,
         }
@@ -64,13 +64,13 @@ class Game(object):
         data[3] = "- " * 26
         data[4] = "Equipment"
         
-        data[6] = ("Left Hand: {}".format(self.inventory.lefthand + 1))    
-        data[7] = ("Right Hand: {}".format(self.inventory.righthand + 1))    
+        data[6] = ("Left Hand: {}".format(self.inventory.lefthand + 1 if self.inventory.lefthand else None))    
+        data[7] = ("Right Hand: {}".format(self.inventory.righthand + 1 if self.inventory.righthand else None))    
         data[8] = "- " * 26
         data[9] = "INVENTORY"
-        data[11] = ("Potions: {}".format(self.inventory.miscitems['potions'])) # num potions store in game #TODO
-        data[12] = ("Keys: {}".format(self.inventory.miscitems['keys'])) # num keys in game #TODO
-        data[13] = ("Trinkets: {}".format(self.inventory.miscitems['trinkets'])) # num trinkets
+        data[11] = ("Potions: {}".format(self.inventory.miscitems['Potions'])) # num Potions store in game #TODO
+        data[12] = ("Keys: {}".format(self.inventory.miscitems['Keys'])) # num keys in game #TODO
+        data[13] = ("Trinkets: {}".format(self.inventory.miscitems['Trinkets'])) # num trinkets
         return data
 
     def printItems(self): #TODO: list enemy weapon in case we want it?
@@ -155,66 +155,56 @@ class Game(object):
         decisions = [x for x in self._getUserMove()]
         playerDamage = 0
         playerAction = ""
-        runs = False
 
         # ATTACKING
         if decisions[0] == 'x':
             self.playerStance = "OFFENSIVE"
             # are we attacking with a ranged weapon?
-            if isinstance(self.inventory.get_items()[self.inventory.lefthand], RangedWeapon):
+            ranged_items = self.inventory.get_equipped_ranged()
+            if ranged_items:
                 # deal the damage
-                playerDamage = self.inventory.get_items()[self.inventory.lefthand].strength
+                playerDamage = ranged_items[0].strength
                 playerAction = "shoot"
-                # if it's the first turn, we can shoot again.
-                if self.bowTurns:
-                    self.bowTurns -= 1
-                    runs = True
 
             # for non-ranged weapons
             else:
                 # deal the damage
-                playerDamage = sum([self.inventory.get_items()[x].strength 
-                                for x in [self.inventory.lefthand, self.inventory.righthand] 
-                                if isinstance(self.inventory.get_items()[x], Weapon)
-                                and not isinstance(self.inventory.get_items()[x], Defense)])
+                playerDamage = sum([x.strength for x in self.inventory.get_equipped_melee()])
                 playerAction = "hit"
 
             # deal the damage and update
             self.current_enemy.damage(playerDamage)
             self.messages.append("You {0} the {1} for {2} damage!".format(playerAction, self.current_enemy.name, playerDamage))
             print "HIT"
-            if runs and not self.current_enemy.isDead():
-                self.messages.append("The {} runs closer to you...".format(self.current_enemy.name))
 
-            # if the self.current_enemy ran towards us, we can take another turn for free
-            if runs and not self.player.isDead() and not self.current_enemy.isDead():
-                self.playerTurn()
             return True
         
         # ITEMS
         elif decisions[0] == 'i':
-            if self.inventory.miscitems["potions"] > 0:
+            item_type = "Potion"
+            result = self.inventory.use_misc(item_type)
+            #TODO: Not yet fully implemented for things other than Potions
+            if result: 
                 self.playerStance = "NEUTRAL"
-                self.inventory.miscitems["potions"] -= 1
-                self.player.health = min(POTION_HEALTH + self.player_health, PLAYER_MAX_HEALTH)
-                self.messages.append("You drank a potion and recovered {} health!".format(POTION_HEALTH))
+                self.player.health = min(result + self.player_health, PLAYER_MAX_HEALTH)
+                self.messages.append("You drank a potion and recovered {} health!".format(result))
                 self.printScreen()
                 return True
             else:
-                self.messages.append("You don't have any potions!")
+                self.messages.append("You don't have any Potions!")
                 return False
 
         # SHIELDING
         elif decisions[0] == 'c':
             # is there a shield equipped?
-            shields = len([self.inventory.get_items()[x] for x in [self.inventory.lefthand, self.inventory.righthand] if self.inventory.get_items()[x].image == "SHIELD"]) #TODO untested
+            shields = self.inventory.get_equipped_defense()
             if shields:
                 self.playerStance = "DEFENSIVE"
                 self.messages.append("You raised your shield!")
                 return True
             else:
                 self.messages.append("You try to raise your shield, only to discover you're not holding one. The {} looks confused.".format(self.current_enemy.name))
-                return True # TODO false?
+                return True
 
         # SWITCHING ITEMS
         elif decisions[0] == 'v':
@@ -267,17 +257,16 @@ class Game(object):
         shield_level = 0
         if self.playerStance == "DEFENSIVE":
             # find the shields the player has
-            if self.inventory.get_items()[self.inventory.lefthand].image == "SHIELD": #TODO type defnsive
-                shield_level += self.inventory.get_items()[self.inventory.lefthand].strength
-            if self.inventory.get_items()[self.inventory.righthand].image == "SHIELD":
-                shield_level += self.inventory.get_items()[self.inventory.righthand].strength
+            shields = self.inventory.get_equipped_defense()
+            shield_level = sum([x.strength for x in shields])
         block_chance = shield_level * SHIELD_LEVEL_BONUS
         event_value = random.uniform(0,1)
         if block_chance and event_value <= block_chance + SHIELD_BASE_CHANCE:
             self.messages.append("You successfully blocked the enemy attack!")
         else:
             self.player.damage(damage)
-            self.messages.append("The {0} hits you for {1} damage!".format(self.current_enemy.name, damage))
+            damageType = "hit" if not isinstance(self.current_enemy.item, RangedWeapon) else "shoot"
+            self.messages.append("The {0} {2}s you for {1} damage!".format(self.current_enemy.name, damage, damageType))
         return True
 
     def runEvent(self):
@@ -285,25 +274,40 @@ class Game(object):
         isPlayerTurn = True
         self.messages = ["A {} appeared!".format(self.current_enemy.name)] #TODO verbage
         self.playerStance = "NEUTRAL"
-        self.bowTurns = 1
+        # Assume player will not make a mistake until he does
         success = True
+        # Is player or enemy using a bow?
+        self.rangedEncounter = False
+        if self.inventory.get_equipped_ranged() or isinstance(self.current_enemy.item, RangedWeapon):
+            self.rangedEncounter = True
 
         self.printScreen()
         while not self.current_enemy.isDead() and not self.player.isDead():
 
+            if self.rangedEncounter:
+                if self.inventory.get_equipped_ranged():
+                    while not self.playerTurn(): # Loop on invalid moves
+                        self.printScreen()
+                if isinstance(self.current_enemy.item, RangedWeapon):
+                    self.enemyTurn()
+
             # Player's move
-            if isPlayerTurn:
-                success = self.playerTurn()
+            elif isPlayerTurn:
+                while not self.playerTurn(): # Loop on invalid moves
+                    self.printScreen()
+
             # enemy's move
             else:
-                success = self.enemyTurn()
+                self.enemyTurn()
             # update
             self.printScreen()
 
-            if success:
-                # Bow is only useful on the first turn
-                if self.bowTurns:
-                    self.bowTurns = 0
+            # Bow is only useful on the first turn
+            if self.rangedEncounter:
+                self.rangedEncounter = False
+                if not self.current_enemy.isDead() and not self.player.isDead() and not isinstance(self.current_enemy.item, RangedWeapon):
+                    self.messages.append("The {} runs closer to you...".format(self.current_enemy.name))
+            else:
                 # Change whose turn it is
                 isPlayerTurn = False if isPlayerTurn else True
         
@@ -322,63 +326,11 @@ class Game(object):
                 if self.inventory.space_exists():
                     self.messages.append("Would you like to pick it up?")
                     self.printScreen()
-                    y_or_n = makeMove({
-                        "decision": "ITEM",
-                        "enemy": {
-                            "name": self.current_enemy.name,
-                            "health": self.current_enemy.health,
-                            "item": {
-                                "type": self.current_enemy.item.image,
-                                "name": self.current_enemy.item.name,
-                                "strength": self.current_enemy.item.strength,
-                            },
-                            "next_attack:": STRENGTHNAMES[self.current_enemy.next_attack],
-                        },
-                        "player": {
-                            "health": self.player.health,
-                        },
-                        "inventory": {
-                            "items": [{
-                                "type": x.image,
-                                "name": x.name,
-                                "strength": x.strength,
-                            } for x in self.items],
-                            "misc": self.miscitems,
-                            "left_equipped": self.lefthand + 1,
-                            "right_equipped": self.righthand + 1,
-                        },
-                        "level": self.level,
-                    })
+                    y_or_n = makeMove(self.getDataForAI("ITEM"))
                     while y_or_n not in ['y', 'Y', 'n', 'N']:
                         self.messages.append("Please enter y/n")
                         self.printScreen()
-                        y_or_n = makeMove({
-                            "decision": "ITEM",
-                            "enemy": {
-                                "name": self.current_enemy.name,
-                                "health": self.current_enemy.health,
-                                "item": {
-                                    "type": self.current_enemy.item.image,
-                                    "name": self.current_enemy.item.name,
-                                    "strength": self.current_enemy.item.strength,
-                                },
-                                "next_attack:": STRENGTHNAMES[self.current_enemy.next_attack],
-                            },
-                            "player": {
-                                "health": self.player.health,
-                            },
-                            "inventory": {
-                                "items": [{
-                                    "type": x.image,
-                                    "name": x.name,
-                                    "strength": x.strength,
-                                } for x in self.items],
-                                "misc": self.miscitems,
-                                "left_equipped": self.lefthand + 1,
-                                "right_equipped": self.righthand + 1,
-                            },
-                            "level": self.level,
-                        })
+                        y_or_n = makeMove(self.getDataForAI("ITEM"))
                     if y_or_n in ['y', 'Y']:
                         # pick up item
                         self.inventory.add_item(self.current_enemy.item)

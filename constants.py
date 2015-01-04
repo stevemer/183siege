@@ -29,9 +29,18 @@ STRENGTHNAMES = {
 # Probabilities and balancing factors
 #####################################
 
-# Items
-POTION_HEALTH = 25
-POTION_NUM = 5
+# Misc Items
+ITEM_STRENGTHS = {
+    "Potions": 25,
+    "Keys": 1,
+    "Trinkets": 1,
+}
+
+ITEM_START_VALUES = {
+    "Potions": 5,
+    "Keys": 0,
+    "Trinkets": 1,
+}
 
 # Enemies
 ENEMY_DAMAGE_CONSTANT = 0.5

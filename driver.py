@@ -13,7 +13,7 @@ from ai import makeMove
 if __name__ == "__main__":
     random.seed()         
 
-    entranceAnimation()
+    #entranceAnimation()
 
     game = Game()
     user = '\0'
