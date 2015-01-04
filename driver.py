@@ -15,14 +15,18 @@ if __name__ == "__main__":
 
     #entranceAnimation()
 
+    VICTORY = 2
+    GOOD = 1
+    ERROR = 0
+
     game = Game()
-    user = '\0'
-    result = True
-    while (user != 'q'):
+    userMove = '\0'
+    resultOfMove = True
+    while (userMove != 'q'):
         #handle move
         game.map.printMap()
         try:
-            if result == 2:
+            if resultOfMove == VICTORY:
                 if game.level < 3:
                     for i in range(22): print
                     print " " * 70 + "Level {} Complete".format(game.level)
@@ -33,22 +37,22 @@ if __name__ == "__main__":
                     game.map = Map()
                 else:
                     raise Victory("You have defeated the Fortress of Dorf!")
-            elif result == 1: 
+            elif resultOfMove == GOOD: 
                 print "Sir Knight, input your move. (W: up, S: down, A: left, D: right, X: automatic): ",
-                user = makeMove(game.getDataForAI("MOVE"))
+                userMove = makeMove(game.getDataForAI("MOVE"))
                 print
-            elif result == 0:
+            elif resultOfMove == ERROR:
                 print "Sorry, that's a wall. Try again? (W: up, S: down, A: left, D: right, X: automatic): ",
-                user = makeMove(game.getDataForAI("MOVE"))
+                userMove = makeMove(game.getDataForAI("MOVE"))
                 print
-            if user == 'w':
-                result = game.move("UP") 
-            elif user == 's':
-                result = game.move("DOWN")
-            elif user == 'a':
-                result = game.move("LEFT")
-            elif user == 'd':
-                result = game.move("RIGHT")
+            if userMove == 'w':
+                resultOfMove = game.move("UP") 
+            elif userMove == 's':
+                resultOfMove = game.move("DOWN")
+            elif userMove == 'a':
+                resultOfMove = game.move("LEFT")
+            elif userMove == 'd':
+                resultOfMove = game.move("RIGHT")
         except Defeat as e:
             for i in range(22): print
             print " " * 60 + str(e)
@@ -60,4 +64,5 @@ if __name__ == "__main__":
             for i in range(22): print
             sys.exit()
 
+    # user quit the game
     print "Bye"

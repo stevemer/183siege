@@ -37,6 +37,7 @@ random.seed()
 '''
 
 def makeMove(options):
+    """ Students will implement this function """
     if not USE_AI:
         return getch()
     time.sleep(1)
