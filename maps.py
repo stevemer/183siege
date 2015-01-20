@@ -10,7 +10,6 @@ class Tile(object):
 
 class Map(object):
     def __init__(self):
-    #self.tiles = [ [Tile()] * MAP_WIDTH] * MAP_HEIGHT
         map_grid = getMap(MAP_WIDTH, MAP_HEIGHT)
         self.tiles = list()
         for i in range(MAP_HEIGHT):

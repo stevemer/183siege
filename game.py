@@ -68,13 +68,18 @@ class Game(object):
 
         data[6] = (
             "Offensive: {}".format(
-                self.inventory.get_equipped_melee().name if self.inventory.get_equipped_melee() else self.inventory.get_equipped_ranged().name \
-                if self.inventory.get_equipped_ranged() else "Nothing"
+                self.inventory.get_equipped_melee().name \
+                if self.inventory.get_equipped_melee() \
+                else self.inventory.get_equipped_ranged().name \
+                if self.inventory.get_equipped_ranged() \
+                else "Nothing"
                 )
         )
         data[7] = (
             "Defensive: {}".format(
-                self.inventory.get_equipped_defense().name if self.inventory.get_equipped_defense() else "Nothing"
+                self.inventory.get_equipped_defense().name \
+                if self.inventory.get_equipped_defense() \
+                else "Nothing"
             )
         )
         data[8] = "- " * 26
