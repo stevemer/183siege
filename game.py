@@ -42,14 +42,11 @@ class Game(object):
                 "health": self.player.health,
             },
             "inventory": {
-                "items": [{
-                    "type": x.image,
-                    "name": x.name,
-                    "strength": x.strength,
-                } for x in self.inventory.items],
+                "equipment": {
+                    "offensive": self.inventory.get_equipped_melee() or self.inventory.get_equipped_ranged(),
+                    "defensive": self.inventory.get_equipped_defense(),
+                },
                 "misc": self.inventory.miscitems,
-                "left_equipped": self.inventory.lefthand + 1 if self.inventory.lefthand else None,
-                "right_equipped": self.inventory.righthand + 1 if self.inventory.righthand else None,
             },
             "level": self.level,
         }
@@ -70,13 +67,16 @@ class Game(object):
         data[4] = "Equipment"
 
         data[6] = (
-            "Left Hand: {}".format(
-                self.inventory.lefthand +
-                1 if self.inventory.lefthand else None))
+            "Offensive: {}".format(
+                self.inventory.get_equipped_melee().name if self.inventory.get_equipped_melee() else self.inventory.get_equipped_range().name \
+                if self.inventory.get_equipped_range() else "Nothing"
+                )
+        )
         data[7] = (
-            "Right Hand: {}".format(
-                self.inventory.righthand +
-                1 if self.inventory.righthand else None))
+            "Defensive: {}".format(
+                self.inventory.get_equipped_defense().name if self.inventory.get_equipped_defense() else "Nothing"
+            )
+        )
         data[8] = "- " * 26
         data[9] = "INVENTORY"
         data[11] = (
@@ -93,105 +93,28 @@ class Game(object):
     def printItems(self):  # TODO: list enemy weapon in case we want it?
 
         # populate list
-        itemlist = []
-        for i in range(6):
-            try:
-                itemlist.append(self.inventory.get_items()[i])
-            except:
-                itemlist.append(None)
+        offensive = self.inventory.get_equipped_ranged() or self.inventory.get_equipped_melee()
+        defensive = self.inventory.get_equipped_defense()        
 
-        iteminfo = []
-        for item in itemlist:
-            if item is not None:
-                itemdata = [
-                    item.name,
-                    "Strength: {}".format(
-                        item.strength),
-                    "",
-                    "",
-                    "",
-                    ""]  # replaced [2] with item.element to ""
-                iteminfo.append(itemdata)
-            else:
-                iteminfo.append(None)
-
-        imagelist = []
-        for i in range(6):
-            if itemlist[i] is not None:
-                imagelist.append(getattr(asciiart, itemlist[i].image))
+        offensive_image = getattr(asciiart, offensive.image).split('\n') if offensive else None
+        defensive_image = getattr(asciiart, defensive.image).split('\n') if defensive else None
 
         miscItems = self._inventoryData()
 
+        # fill the next 14 lines
+
         lines = []
-        #lines.append("- " * 80)
-        lines.append(
-            "| 1." +
-            " " *
-            32 +
-            "| 2." +
-            " " *
-            32 +
-            "| 3." +
-            " " *
-            32 +
-            "| Enemy   " +
-            " " *
-            44 +
-            "|")
-        for i in range(6):
-            lines.append("| " +
-                         ("{:18s}".format(str(iteminfo[0][i])) if itemlist[0] else " " *
-                          18) +
-                         (imagelist[0].split("\n")[i] if itemlist[0] else " " *
-                          16) +
-                         "| " +
-                         ("{:18s}".format(str(iteminfo[1][i])) if itemlist[1] else " " *
-                             18) +
-                         (imagelist[1].split("\n")[i] if itemlist[1] else " " *
-                             16) +
-                         "| " +
-                         ("{:18s}".format(str(iteminfo[2][i])) if itemlist[2] else " " *
-                             18) +
-                         (imagelist[2].split("\n")[i] if itemlist[2] else " " *
-                             16) +
-                         "| " +
-                         "{:52s}".format(miscItems[i]) +
-                         "|")
-        lines.append("- " * 54 + "| " + "{:52s}".format(miscItems[6]) + "|")
-        lines.append(
-            "| 4." +
-            " " *
-            32 +
-            "| 5." +
-            " " *
-            32 +
-            "| 6." +
-            " " *
-            32 +
-            "| " +
-            "{:52s}".format(
-                miscItems[7]) +
-            "|")
-        for i in range(6):
-            lines.append("| " +
-                         ("{:18s}".format(str(iteminfo[3][i])) if itemlist[3] else " " *
-                          18) +
-                         (imagelist[3].split("\n")[i] if itemlist[3] else " " *
-                          16) +
-                         "| " +
-                         ("{:18s}".format(str(iteminfo[4][i])) if itemlist[4] else " " *
-                             18) +
-                         (imagelist[4].split("\n")[i] if itemlist[4] else " " *
-                             16) +
-                         "| " +
-                         ("{:18s}".format(str(iteminfo[5][i])) if itemlist[5] else " " *
-                             18) +
-                         (imagelist[5].split("\n")[i] if itemlist[5] else " " *
-                             16) +
-                         "| " +
-                         "{:52s}".format(miscItems[i +
-                                                   8]) +
-                         "|")
+        lines.append("Offensive Weapon" + " " * 36 + " | " + "Defensive Weapon" + " " * 37 + "| " + "{:52s}".format(miscItems[0]) + "|")
+        lines.append(" " * 53 + "|" + " " * 54 + "| " + "{:52s}".format(miscItems[1]) + "|")
+
+        offensive_stats = ["Name: " + str(offensive.name), "Strength: " + str(offensive.strength)] if offensive else None
+        defensive_stats = ["Name: " + str(defensive.name), "Strength: " + str(defensive.strength)] if defensive else None
+
+        for i in range(12):
+            lines.append("{:22s}".format(offensive_stats[i] if i < len(offensive_stats) else "") + (offensive_image[i] if offensive_image else " " * 25) + " | " 
+                       + "{:22s}".format(defensive_stats[i] if i < len(defensive_stats) else "") + (defensive_image[i] if defensive_image else " " * 25) + " | "
+                       + "{:52s}".format(miscItems[i+2]) + "|")
+        
         lines.append("- " * 82)
         for line in lines:
             print line
@@ -224,7 +147,7 @@ class Game(object):
 
         print "What will you do? ('h' for help)",
         decision = makeMove(self.getDataForAI("ATTACK"))
-        while decision[0] not in ['x', 'c', 'v', 'i']:
+        while decision[0] not in ['x', 'c', 'i']:
             self.messages.append(
                 "That's not a valid command - what will you do?")
             self.printScreen()
@@ -257,8 +180,7 @@ class Game(object):
             # for non-ranged weapons
             else:
                 # deal the damage
-                playerDamage = sum(
-                    [x.strength for x in self.inventory.get_equipped_melee()])
+                playerDamage = self.inventory.get_equipped_melee().strength
                 playerAction = "hit"
 
             # deal the damage and update
@@ -305,52 +227,6 @@ class Game(object):
                         self.current_enemy.name))
                 return True
 
-        # SWITCHING ITEMS
-        elif decisions[0] == 'v':
-            success = True
-            hand = decisions[1] if USE_AI else getch()
-            if hand not in [',', '.', '<', '>']:
-                try:
-                    x = int(hand)
-                except:
-                    success = False
-                else:
-                    # user wants to equip a bow, so both hands will be used.
-                    if len(
-                        self.inventory.get_items()) > x - 1 and isinstance(
-                        self.inventory.get_items()[
-                            x - 1],
-                            RangedWeapon):
-                        # we can switch to it
-                        success = self.inventory.equip_both(x)
-                    else:
-                        success = False
-
-            else:
-                num = decisions[2] if USE_AI else getch()
-                try:
-                    num = int(num)
-                except:
-                    success = False
-
-                if num not in range(6):
-                    success = False
-                elif hand in [',', '<']:
-                    # player wants to equip left
-                    success = self.inventory.equip_left(num)
-                else:
-                    # player wants to equip right
-                    success = self.inventory.equip_right(num)
-
-            # check the results of our equip stage
-            if success:
-                self.playerStance = "NEUTRAL"
-                self.messages.append("You successfully switched weapons!")
-                return True
-            else:
-                self.messages.append("You can't switch to that weapon!")
-                return False
-
         # BAD COMMAND
         else:
             assert(False and "Invalid command specified")
@@ -366,8 +242,7 @@ class Game(object):
         shield_level = 0
         if self.playerStance == "DEFENSIVE":
             # find the shields the player has
-            shields = self.inventory.get_equipped_defense()
-            shield_level = sum([x.strength for x in shields])
+            shield_level = self.inventory.get_equipped_defense().strength
         block_chance = shield_level * SHIELD_LEVEL_BONUS
         event_value = random.uniform(0, 1)
         if block_chance and event_value <= block_chance + SHIELD_BASE_CHANCE:
@@ -453,23 +328,18 @@ class Game(object):
                         self.current_enemy.name,
                         self.current_enemy.item.name))
                 self.current_enemy.image = "BLANK_ENEMY"
-                if self.inventory.space_exists():
-                    self.messages.append("Would you like to pick it up?")
+                self.messages.append("Would you like to pick it up?")
+                self.printScreen()
+                y_or_n = makeMove(self.getDataForAI("ITEM"))
+                while y_or_n not in ['y', 'Y', 'n', 'N']:
+                    self.messages.append("Please enter y/n")
                     self.printScreen()
                     y_or_n = makeMove(self.getDataForAI("ITEM"))
-                    while y_or_n not in ['y', 'Y', 'n', 'N']:
-                        self.messages.append("Please enter y/n")
-                        self.printScreen()
-                        y_or_n = makeMove(self.getDataForAI("ITEM"))
-                    if y_or_n in ['y', 'Y']:
-                        # pick up item
-                        self.inventory.add_item(self.current_enemy.item)
-                        self.printScreen()
-                        time.sleep(2)
-                else:
-                    # TODO replace items??? maybe, maybe not
-                    self.messages.append("Your inventory is full!")
+                if y_or_n in ['y', 'Y']:
+                    # pick up item
+                    self.inventory.equip(self.current_enemy.item)
                     self.printScreen()
+                    time.sleep(2)
 
         elif self.player.isDead():
             raise Defeat("You have been defeated.")
