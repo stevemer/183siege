@@ -58,10 +58,7 @@ if __name__ == "__main__":
                 result = game.inventory.use_misc(item_type)
                 # TODO: Not yet fully implemented for things other than Potions
                 if result:
-                    game.player.health = min(
-                        result +
-                        game.player.health,
-                        PLAYER_MAX_HEALTH)
+                    game.player.health = min(result + game.player.health, PLAYER_MAX_HEALTH)
                     print("You drank a potion and recovered {} health!".format(result))
                     resultOfMove = GOOD
                 else:

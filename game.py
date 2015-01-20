@@ -68,8 +68,8 @@ class Game(object):
 
         data[6] = (
             "Offensive: {}".format(
-                self.inventory.get_equipped_melee().name if self.inventory.get_equipped_melee() else self.inventory.get_equipped_range().name \
-                if self.inventory.get_equipped_range() else "Nothing"
+                self.inventory.get_equipped_melee().name if self.inventory.get_equipped_melee() else self.inventory.get_equipped_ranged().name \
+                if self.inventory.get_equipped_ranged() else "Nothing"
                 )
         )
         data[7] = (
