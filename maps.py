@@ -1,6 +1,6 @@
 from constants import *
 from dungeon_generator import getMap, getEntrance
-import time, random
+import time, random, heapq
 from asciiart import *
 
 class Tile(object):
@@ -124,3 +124,32 @@ class Map(object):
         self.tiles[self.player[0]][self.player[1]].data = 'X'
         self.revealRoom()
         return False
+
+    def locIsFree(self, loc):
+        return self.tiles[loc[0]][loc[1]].data == ' '
+
+    @staticmethod
+    def manDist(src, dest):
+        return abs(src[0] - dest[0]) + abs(src[1] - dest[1])
+
+    def findPath(self, src, dest):
+        path = [src,]
+        # queue holds items of structure (cost+guess, (x, y), cost)
+        visited = set()
+        queue = [(manDist(src, dest), src, 0),]
+        while queue:
+            loc = queue[0][1]
+            cost = queue[0][2]
+            visited.add(loc)
+            queue = queue[1:]
+            if loc == dest:
+                path.append(dest)
+                return path
+            for diff in (-1, 1):
+                newLoc = (loc[0] + diff, loc[1])
+                if newLoc not in visited and locIsFree(self, newLoc):
+                    heapq.heappush(queue, (cost + manDist(newLoc, dest) + 1, newLoc, cost+1))
+                newLoc = (loc[0], loc[1] + diff)
+                if newLoc not in visited and locIsFree(self, newLoc):
+                    heapq.heappush(queue, (cost + manDist(newLoc, dest) + 1, newLoc, cost+1))
+        return None
