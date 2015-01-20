@@ -108,11 +108,11 @@ class Game(object):
         lines.append(" " * 53 + "|" + " " * 54 + "| " + "{:52s}".format(miscItems[1]) + "|")
 
         offensive_stats = ["Name: " + str(offensive.name), "Strength: " + str(offensive.strength)] if offensive else None
-        defensive_stats = ["Name: " + str(defensive.name), "Strength: " + str(defensive.strength)] if defensive else None
-
+        defensive_stats = ["Name: " + str(defensive.name), "Strength: " + str(defensive.strength)] if defensive else \
+                          ["Name: None", "Strength: None"]
         for i in range(12):
-            lines.append("{:22s}".format(offensive_stats[i] if i < len(offensive_stats) else "") + (offensive_image[i] if offensive_image else " " * 25) + " | " 
-                       + "{:22s}".format(defensive_stats[i] if i < len(defensive_stats) else "") + (defensive_image[i] if defensive_image else " " * 25) + " | "
+            lines.append("{:22s}".format(offensive_stats[i] if offensive_stats and i < len(offensive_stats) else "") + (offensive_image[i] if offensive_image else " " * 30) + " | " 
+                       + "{:22s}".format(defensive_stats[i] if defensive_stats and i < len(defensive_stats) else "") + (defensive_image[i] if defensive_image else " " * 30) + " | "
                        + "{:52s}".format(miscItems[i+2]) + "|")
         
         lines.append("- " * 82)
@@ -196,14 +196,14 @@ class Game(object):
 
         # ITEMS
         elif decisions[0] == 'i':
-            item_type = "Potion"
+            item_type = "Potions"
             result = self.inventory.use_misc(item_type)
             # TODO: Not yet fully implemented for things other than Potions
             if result:
                 self.playerStance = "NEUTRAL"
                 self.player.health = min(
                     result +
-                    self.player_health,
+                    self.player.health,
                     PLAYER_MAX_HEALTH)
                 self.messages.append(
                     "You drank a potion and recovered {} health!".format(result))

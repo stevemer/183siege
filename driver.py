@@ -38,11 +38,11 @@ if __name__ == "__main__":
                 else:
                     raise Victory("You have defeated the Fortress of Dorf!")
             elif resultOfMove == GOOD: 
-                print "Sir Knight, input your move. (W: up, S: down, A: left, D: right, X: automatic): ",
+                print "Sir Knight, input your move. (W: up, S: down, A: left, D: right, X: automatic, I: potion): ",
                 userMove = makeMove(game.getDataForAI("MOVE"))
                 print
             elif resultOfMove == ERROR:
-                print "Sorry, that's a wall. Try again? (W: up, S: down, A: left, D: right, X: automatic): ",
+                print "Sorry, you can't do that. Try again? (W: up, S: down, A: left, D: right, X: automatic, I: potion): ",
                 userMove = makeMove(game.getDataForAI("MOVE"))
                 print
             if userMove == 'w':
@@ -53,6 +53,22 @@ if __name__ == "__main__":
                 resultOfMove = game.move("LEFT")
             elif userMove == 'd':
                 resultOfMove = game.move("RIGHT")
+            elif userMove == 'i':
+                item_type = "Potions"
+                result = game.inventory.use_misc(item_type)
+                # TODO: Not yet fully implemented for things other than Potions
+                if result:
+                    game.player.health = min(
+                        result +
+                        game.player.health,
+                        PLAYER_MAX_HEALTH)
+                    print("You drank a potion and recovered {} health!".format(result))
+                    resultOfMove = GOOD
+                else:
+                    self.messages.append("You don't have any Potions!")
+                    resultOfMove = ERROR
+            elif userMove == 'x':
+                assert(False)
         except Defeat as e:
             for i in range(22): print
             print " " * 60 + str(e)
