@@ -1,3 +1,5 @@
+# preserve pygame branch
+
 import sys
 import asciiart
 import random
