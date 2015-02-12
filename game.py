@@ -115,8 +115,9 @@ class Game(object):
         offensive_stats = ["Name: " + str(offensive.name), "Strength: " + str(offensive.strength)] if offensive else None
         defensive_stats = ["Name: " + str(defensive.name), "Strength: " + str(defensive.strength)] if defensive else \
                           ["Name: None", "Strength: None"]
+
         for i in range(12):
-            lines.append("{:22s}".format(offensive_stats[i] if offensive_stats and i < len(offensive_stats) else "") + (offensive_image[i] if offensive_image else " " * 30) + " | " 
+            lines.append("{:22s}".format(offensive_stats[i] if offensive_stats and i < len(offensive_stats) else "") + (offensive_image[i] if offensive_image and i < len(offensive_image) else " " * 30) + " | "
                        + "{:22s}".format(defensive_stats[i] if defensive_stats and i < len(defensive_stats) else "") + (defensive_image[i] if defensive_image else " " * 30) + " | "
                        + "{:52s}".format(miscItems[i+2]) + "|")
         
