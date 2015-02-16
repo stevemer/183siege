@@ -187,7 +187,9 @@ class Game(object):
                 # deal the damage
                 playerAction = "hit"
 
-            playerDamage = self.inventory.get_damage()
+            playerDamage = self.inventory.get_damage() 
+            if (self.rangedEncounter): 
+                playerDamage *= RANGE_COMBAT_FACTOR
             # deal the damage and update
             self.current_enemy.damage(playerDamage)
             self.messages.append(
@@ -335,18 +337,19 @@ class Game(object):
                         self.current_enemy.item.name))
                 self.current_enemy.image = "BLANK_ENEMY"
                 self.messages.append("Would you like to pick it up with one of your hands?")
+                self.messages.append("[1: Pick up with LH] [2: Pick up with RH] [3: Don't pick up]")
                 self.printScreen()
                 y_or_n = makeMove(self.getDataForAI("ITEM"))
-                while y_or_n not in ['y', 'Y', 'n', 'N']:
-                    self.messages.append("Please enter y1/y2/n")
+                while y_or_n not in ['1', '2', '3']:
+                    self.messages.append("Please enter 1/2/3")
                     self.printScreen()
                     y_or_n = makeMove(self.getDataForAI("ITEM"))
-                if y_or_n in ['y1', 'Y1']:
+                if y_or_n == '1':
                     # pick up item
                     self.inventory.equip_left(self.current_enemy.item)
                     self.printScreen()
                     time.sleep(2)
-                elif y_or_n in ['y2', 'Y2']:
+                elif y_or_n == '2':
                     self.inventory.equip_right(self.current_enemy.item)
                     self.printScreen()
                     time.sleep(2)
