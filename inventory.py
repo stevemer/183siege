@@ -3,43 +3,90 @@ from entities import *
 
 class Inventory(object):
     def __init__(self):
-        self.offensive_weapon = MeleeWeapon("SWORD", "Wooden Sword", 1)
-        self.defensive_weapon = None #Defense("SHIELD", "Wooden Shield", 1)
+        self.left_weapon = MeleeWeapon("SWORD", "Wooden Sword", 1)
+        self.right_weapon = None #Defense("SHIELD", "Wooden Shield", 1)
         self.miscitems = {
             "Potions": 3, 
             "Keys": 0, 
             "Trinkets": 0,
         }
 
-    def equip(self, item):
+    def equip_left(self, item):
         if isinstance(item, RangedWeapon):
-            self.offensive_weapon = item
-            self.defensive_weapon = None
+            self.left_weapon = item
+            self.right_weapon = None
         elif isinstance(item, MeleeWeapon):
-            self.offensive_weapon = item
+            self.left_weapon = item
         elif isinstance(item, Defense):
-            if isinstance(self.offensive_weapon, RangedWeapon):
-                self.offensive_weapon = None
-            self.defensive_weapon = item
+            if isinstance(self.left_weapon, RangedWeapon):
+                self.right_weapon = None
+            self.left_weapon = item
+    
+        else:
+            raise Exception("Equipped item has invalid type")
+    
+    def equip_right(self, item):
+        if isinstance(item, RangedWeapon):
+            self.left_weapon = item
+            self.right_weapon = None
+        elif isinstance(item, MeleeWeapon):
+            self.left_weapon = item
+        elif isinstance(item, Defense):
+            if isinstance(self.left_weapon, RangedWeapon):
+                self.left_weapon = None
+            self.right_weapon = item
     
         else:
             raise Exception("Equipped item has invalid type")
 
     def get_equipped(self):
         return [
-            self.offensive_weapon,
-            self.defensive_weapon
+            self.left_weapon,
+            self.right_weapon
         ]
 
     def get_equipped_defense(self):
-        return self.defensive_weapon
+        if isinstance(self.left_weapon, Defense): return self.left_weapon
+        elif isinstance(self.right_weapon, Defense): return self.right_weapon
+        else: return None
 
     def get_equipped_melee(self):
-        return self.offensive_weapon if isinstance(self.offensive_weapon, MeleeWeapon) else None
+        if isinstance(self.left_weapon, MeleeWeapon): return self.left_weapon
+        elif isinstance(self.right_weapon, MeleeWeapon): return self.right_weapon
+        else: return None
 
     def get_equipped_ranged(self):
-        return self.offensive_weapon if isinstance(self.offensive_weapon, RangedWeapon) else None
+        if isinstance(self.left_weapon, RangedWeapon):
+            assert(self.right_weapon == None)
+            return self.left_weapon
+        elif isinstance(self.right_weapon, RangedWeapon):
+            assert(self.left_weapon == None)
+            return self.right_weapon
+        else: 
+            return None
 
+    def get_damage(self):
+        damage = 0
+        # ranged dmg applies * 1.5
+        if isinstance(self.left_weapon, RangedWeapon):
+            damage += self.left_weapon.strength
+        elif isinstance(self.left_weapon, MeleeWeapon):
+            damage += self.left_weapon.strength
+        if isinstance(self.right_weapon, RangedWeapon):
+            assert(0)
+            damage += self.right_weapon.strength
+        elif isinstance(self.right_weapon, MeleeWeapon):
+            damage += self.right_weapon.strength * .5
+        return damage 
+   
+    def get_defense(self):
+        defense = 0
+        if isinstance(self.left_weapon, Defense):
+            defense += self.left_weapon.strength
+        elif isinstance(self.right_weapon, Defense):
+            defense += self.right_weapon.strength
+        return damage
+ 
     def get_items(self):
         return self.get_equipped()
 

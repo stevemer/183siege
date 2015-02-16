@@ -180,15 +180,14 @@ class Game(object):
             ranged_items = self.inventory.get_equipped_ranged()
             if ranged_items:
                 # deal the damage
-                playerDamage = ranged_items[0].strength
                 playerAction = "shoot"
 
             # for non-ranged weapons
             else:
                 # deal the damage
-                playerDamage = self.inventory.get_equipped_melee().strength
                 playerAction = "hit"
 
+            playerDamage = self.inventory.get_damage()
             # deal the damage and update
             self.current_enemy.damage(playerDamage)
             self.messages.append(
@@ -248,7 +247,8 @@ class Game(object):
         shield_level = 0
         if self.playerStance == "DEFENSIVE":
             # find the shields the player has
-            shield_level = self.inventory.get_equipped_defense().strength
+            #shield_level = self.inventory.get_equipped_defense().strength
+            shield_level = self.inventory.get_defense()
         block_chance = shield_level * SHIELD_LEVEL_BONUS
         event_value = random.uniform(0, 1)
         if block_chance and event_value <= block_chance + SHIELD_BASE_CHANCE:
@@ -334,16 +334,20 @@ class Game(object):
                         self.current_enemy.name,
                         self.current_enemy.item.name))
                 self.current_enemy.image = "BLANK_ENEMY"
-                self.messages.append("Would you like to pick it up?")
+                self.messages.append("Would you like to pick it up with one of your hands?")
                 self.printScreen()
                 y_or_n = makeMove(self.getDataForAI("ITEM"))
                 while y_or_n not in ['y', 'Y', 'n', 'N']:
-                    self.messages.append("Please enter y/n")
+                    self.messages.append("Please enter y1/y2/n")
                     self.printScreen()
                     y_or_n = makeMove(self.getDataForAI("ITEM"))
-                if y_or_n in ['y', 'Y']:
+                if y_or_n in ['y1', 'Y1']:
                     # pick up item
-                    self.inventory.equip(self.current_enemy.item)
+                    self.inventory.equip_left(self.current_enemy.item)
+                    self.printScreen()
+                    time.sleep(2)
+                elif y_or_n in ['y2', 'Y2']:
+                    self.inventory.equip_right(self.current_enemy.item)
                     self.printScreen()
                     time.sleep(2)
 

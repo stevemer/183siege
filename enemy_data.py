@@ -9,9 +9,22 @@ enemies = [
             "max": 5,
         },
         "items": [
-            {"name": "Smelly Dagger","type": "SWORD", "strength": 1},
-            {"name": "Slimy Bow", "type": "BOW", "strength": 1},
-            {"name": "Old Shield", "type": "SHIELD", "strength": 1},
+            {"name": "Smelly Dagger","type": "SWORD", "strength": 5},
+            {"name": "Slimy Bow", "type": "BOW", "strength": 5},
+            {"name": "Moldy Shield", "type": "SHIELD", "strength": 5},
+        ]
+    },
+    {
+        "name": "Big Goblin",
+        "image": "GOBLIN",
+        "health": {
+            "min": 1,
+            "max": 5,
+        },
+        "items": [
+            {"name": "Risty Dagger","type": "SWORD", "strength": 6},
+            {"name": "Grimy Bow", "type": "BOW", "strength": 6},
+            {"name": "Old Shield", "type": "SHIELD", "strength": 6},
         ]
     },
     {
@@ -22,9 +35,22 @@ enemies = [
             "max": 8,
         },
         "items": [
-            {"name": "Rusty Sword","type": "SWORD", "strength": 2},
-            {"name": "Rusty Bow", "type": "BOW", "strength": 2},
-            {"name": "Buckler", "type": "SHIELD", "strength": 2},
+            {"name": "Plain Sword","type": "SWORD", "strength": 7},
+            {"name": "Plain Bow", "type": "BOW", "strength": 7},
+            {"name": "Buckler", "type": "SHIELD", "strength": 7},
+        ]
+    },
+    {
+        "name": "Big Skeleton",
+        "image": "SKELETON",
+        "health": {
+            "min": 3,
+            "max": 8,
+        },
+        "items": [
+            {"name": "Good Sword","type": "SWORD", "strength": 8},
+            {"name": "Strong Bow", "type": "BOW", "strength": 8},
+            {"name": "Big Shield", "type": "SHIELD", "strength": 8},
         ]
     },
     {
@@ -35,9 +61,9 @@ enemies = [
             "max": 15,
         },
         "items": [
-            {"name": "Club","type": "CLUB", "strength": 3},
-            #{"name": "Big Bow", "type": "BOW", "strength": 3},
-            {"name": "Solid Shield", "type": "SHIELD", "strength": 3},
+            {"name": "Club of Whacking","type": "CLUB", "strength": 9},
+            {"name": "Powerful Bow", "type": "BOW", "strength": 9},
+            {"name": "Reinforced Shield", "type": "SHIELD", "strength": 9},
         ]
     },
 ]
