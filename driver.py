@@ -60,10 +60,11 @@ if __name__ == "__main__":
                 if result:
                     game.player.health = min(result + game.player.health, PLAYER_MAX_HEALTH)
                     print("You drank a potion and recovered {} health!".format(result))
-                    resultOfMove = GOOD
                 else:
-                    self.messages.append("You don't have any Potions!")
-                    resultOfMove = ERROR
+                    #self.messages.append("You don't have any Potions!")
+                    print("You don't have any Potions!")
+                    #resultOfMove = ERROR
+                resultOfMove = GOOD
             elif userMove == 'x':
                 assert(False)
         except Defeat as e:
