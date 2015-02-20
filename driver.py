@@ -66,7 +66,8 @@ if __name__ == "__main__":
                     #resultOfMove = ERROR
                 resultOfMove = GOOD
             elif userMove == 'x':
-                assert(False)
+                #assert(False)
+                print game.map.findPath()
         except Defeat as e:
             for i in range(22): print
             print " " * 60 + str(e)

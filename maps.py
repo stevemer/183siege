@@ -125,33 +125,81 @@ class Map(object):
         self.revealRoom()
         return False
 
+    def _isInBounds(self,loc):
+        return 0 <= loc[0] < MAP_HEIGHT and 0 <= loc[1] < MAP_WIDTH
+
     def locIsFree(self, loc):
-        if loc[0] < 0 or loc[0] >= MAP_HEIGHT or loc[1] < 0 or loc[1] > MAP_WIDTH:
+        if not self._isInBounds(loc):
             return False
         return self.tiles[loc[0]][loc[1]].data == ' '
+
+    def _locIsDoor(self,loc):
+        if not self._isInBounds(loc):
+            return False
+        return self.tiles[loc[0]][loc[1]].data == '='
 
     @staticmethod
     def manDist(src, dest):
         return abs(src[0] - dest[0]) + abs(src[1] - dest[1])
 
-    def findPath(self, src, dest):
-        path = [src,]
-        # queue holds items of structure (cost+guess, (x, y), cost)
+    def findPath(self):
+        # path = [src,]
+        # # queue holds items of structure (cost+guess, (x, y), cost)
+        # visited = set()
+        # queue = [(self.manDist(src, dest), src, 0),]
+        # while queue:
+        #     loc = queue[0][1]
+        #     cost = queue[0][2]
+        #     visited.add(loc)
+        #     queue = queue[1:]
+        #     if loc == dest:
+        #         path.append(dest)
+        #         return path
+        #     for diff in (-1, 1):
+        #         newLoc = (loc[0] + diff, loc[1])
+        #         if newLoc not in visited and self.locIsFree(newLoc):
+        #             heapq.heappush(queue, (cost + self.manDist(newLoc, dest) + 1, newLoc, cost+1))
+        #         newLoc = (loc[0], loc[1] + diff)
+        #         if newLoc not in visited and self.locIsFree(newLoc):
+        #             heapq.heappush(queue, (cost + self.manDist(newLoc, dest) + 1, newLoc, cost+1))
+        # return None
+        src, dest = self.player, self.victory
+
         visited = set()
         queue = [(self.manDist(src, dest), src, 0),]
+        cameFrom = {}
+
         while queue:
-            loc = queue[0][1]
-            cost = queue[0][2]
-            visited.add(loc)
-            queue = queue[1:]
-            if loc == dest:
-                path.append(dest)
-                return path
-            for diff in (-1, 1):
-                newLoc = (loc[0] + diff, loc[1])
-                if newLoc not in visited and self.locIsFree(newLoc):
-                    heapq.heappush(queue, (cost + self.manDist(newLoc, dest) + 1, newLoc, cost+1))
-                newLoc = (loc[0], loc[1] + diff)
-                if newLoc not in visited and self.locIsFree(newLoc):
-                    heapq.heappush(queue, (cost + self.manDist(newLoc, dest) + 1, newLoc, cost+1))
+            currentLoc, cost = queue[0][1], queue[0][2]
+            if currentLoc == dest:
+                return self._constructPath(cameFrom, currentLoc)
+
+            heapq.heappop(queue)
+            visited.add(currentLoc)
+            for diff in (-1,1):
+                xLoc = (currentLoc[0] + diff, currentLoc[1])
+                if (self.locIsFree(xLoc) or self._locIsDoor(xLoc) or xLoc == dest) and (xLoc not in visited or cost + 1 < cameFrom[xLoc][1]):
+                    cameFrom[xLoc] = (currentLoc, cost + 1) # update cameFrom map so that xLoc -> where I came from
+                    queueItem = (cost + self.manDist(xLoc, dest) + 1, xLoc, cost + 1)
+                    if queueItem not in queue:
+                        heapq.heappush(queue, queueItem)
+
+                yLoc = (currentLoc[0], currentLoc[1] + diff)
+                if (self.locIsFree(yLoc) or self._locIsDoor(yLoc) or yLoc == dest) and (yLoc not in visited or cost + 1 < cameFrom[yLoc][1]):
+                    cameFrom[yLoc] = (currentLoc, cost + 1)
+                    queueItem = (cost + self.manDist(yLoc, dest) + 1, yLoc, cost + 1)
+                    if queueItem not in queue:
+                        heapq.heappush(queue, queueItem)
         return None
+
+    def _constructPath(self, cameFromMap, current):
+        path = [current,]
+        print 'Constructing path...{}'.format(len(cameFromMap.keys()))
+        while current in cameFromMap.keys():
+            tempKey = current
+            current = cameFromMap[current][0]
+            del cameFromMap[tempKey]
+            path.append(current)
+        print 'Finished constructing path!'
+        path.reverse()
+        return path
