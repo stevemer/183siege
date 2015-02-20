@@ -20,9 +20,7 @@ class Inventory(object):
                 self.right_weapon = None
             self.left_weapon = item
         elif isinstance(item, Defense):
-            if isinstance(self.left_weapon, RangedWeapon):
-                self.right_weapon = None
-            self.left_weapon = item
+            self.equip_right(item)
     
         else:
             raise Exception("Equipped item has invalid type")
