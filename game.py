@@ -63,7 +63,7 @@ class Game(object):
         data[2] = "Next Attack: {}".format(
             STRENGTHNAMES[
                 self.current_enemy.next_attack])
-        data[3] = "- " * 26
+        data[3] = "- " * 25
         data[4] = "Equipment"
 
         data[6] = (
@@ -82,7 +82,7 @@ class Game(object):
                 else "Nothing"
             )
         )
-        data[8] = "- " * 26
+        data[8] = "- " * 25
         data[9] = "INVENTORY"
         data[11] = (
             "Potions: {}".format(
@@ -98,8 +98,9 @@ class Game(object):
     def printItems(self):  # TODO: list enemy weapon in case we want it?
 
         # populate list
-        offensive = self.inventory.get_equipped_ranged() or self.inventory.get_equipped_melee()
-        defensive = self.inventory.get_equipped_defense()        
+        # offensive = self.inventory.get_equipped_ranged() or self.inventory.get_equipped_melee()
+        # defensive = self.inventory.get_equipped_defense()
+        offensive,defensive = self.inventory.get_equipped()
 
         offensive_image = getattr(asciiart, offensive.image).split('\n') if offensive else None
         defensive_image = getattr(asciiart, defensive.image).split('\n') if defensive else None
@@ -109,17 +110,17 @@ class Game(object):
         # fill the next 14 lines
 
         lines = []
-        lines.append("Offensive Weapon" + " " * 36 + " | " + "Defensive Weapon" + " " * 37 + "| " + "{:52s}".format(miscItems[0]) + "|")
-        lines.append(" " * 53 + "|" + " " * 54 + "| " + "{:52s}".format(miscItems[1]) + "|")
+        lines.append("| Offensive Weapon" + " " * 35 + " | " + "Defensive Weapon" + " " * 37 + "| " + "{:51s}".format(miscItems[0]) + "|")
+        lines.append("| " + " " * 52 + "|" + " " * 54 + "| " + "{:51s}".format(miscItems[1]) + "|")
 
-        offensive_stats = ["Name: " + str(offensive.name), "Strength: " + str(offensive.strength)] if offensive else None
+        offensive_stats = [" Name: " + str(offensive.name), " Strength: " + str(offensive.strength)] if offensive else None
         defensive_stats = ["Name: " + str(defensive.name), "Strength: " + str(defensive.strength)] if defensive else \
                           ["Name: None", "Strength: None"]
 
         for i in range(12):
-            lines.append("{:22s}".format(offensive_stats[i] if offensive_stats and i < len(offensive_stats) else "") + (offensive_image[i] if offensive_image and i < len(offensive_image) else " " * 30) + " | "
+            lines.append("|{:22s}".format(offensive_stats[i] if offensive_stats and i < len(offensive_stats) else "") + (offensive_image[i] if offensive_image and i < len(offensive_image) else " " * 30) + " | "
                        + "{:22s}".format(defensive_stats[i] if defensive_stats and i < len(defensive_stats) else "") + (defensive_image[i] if defensive_image else " " * 30) + " | "
-                       + "{:52s}".format(miscItems[i+2]) + "|")
+                       + "{:51s}".format(miscItems[i+2]) + "|")
         
         lines.append("- " * 82)
         for line in lines:
