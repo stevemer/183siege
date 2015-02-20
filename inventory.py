@@ -16,6 +16,8 @@ class Inventory(object):
             self.left_weapon = item
             self.right_weapon = None
         elif isinstance(item, MeleeWeapon):
+            if isinstance(self.right_weapon, RangedWeapon):
+                self.right_weapon = None
             self.left_weapon = item
         elif isinstance(item, Defense):
             if isinstance(self.left_weapon, RangedWeapon):
@@ -30,6 +32,8 @@ class Inventory(object):
             self.left_weapon = item
             self.right_weapon = None
         elif isinstance(item, MeleeWeapon):
+            if isinstance(self.left_weapon, RangedWeapon):
+                self.left_weapon = None
             self.right_weapon = item
         elif isinstance(item, Defense):
             if isinstance(self.left_weapon, RangedWeapon):
