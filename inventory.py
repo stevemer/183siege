@@ -79,7 +79,7 @@ class Inventory(object):
             damage += self.right_weapon.strength
         elif isinstance(self.right_weapon, MeleeWeapon):
             damage += self.right_weapon.strength * OFFHAND_FACTOR
-        return damage 
+        return max(damage, 1)
    
     def get_defense(self):
         defense = 0
