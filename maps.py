@@ -138,6 +138,9 @@ class Map(object):
             return False
         return self.tiles[loc[0]][loc[1]].data == '='
 
+    def _locIsWall(self,loc):
+        return self.tiles[loc[0]][loc[1]].data == '#'
+
     @staticmethod
     def manDist(src, dest):
         return abs(src[0] - dest[0]) + abs(src[1] - dest[1])
@@ -178,28 +181,28 @@ class Map(object):
             visited.add(currentLoc)
             for diff in (-1,1):
                 xLoc = (currentLoc[0] + diff, currentLoc[1])
-                if (self.locIsFree(xLoc) or self._locIsDoor(xLoc) or xLoc == dest) and (xLoc not in visited or cost + 1 < cameFrom[xLoc][1]):
-                    cameFrom[xLoc] = (currentLoc, cost + 1) # update cameFrom map so that xLoc -> where I came from
+                if xLoc not in visited:
                     queueItem = (cost + self.manDist(xLoc, dest) + 1, xLoc, cost + 1)
-                    if queueItem not in queue:
-                        heapq.heappush(queue, queueItem)
+                    if (self._isInBounds(xLoc) and not self._locIsWall(xLoc)) and (queueItem not in queue or (cost + 1 < cameFrom[xLoc][1])):
+                        cameFrom[xLoc] = (currentLoc, cost + 1) # update cameFrom map so that xLoc -> where I came from
+                        if queueItem not in queue:
+                            heapq.heappush(queue, queueItem)
 
                 yLoc = (currentLoc[0], currentLoc[1] + diff)
-                if (self.locIsFree(yLoc) or self._locIsDoor(yLoc) or yLoc == dest) and (yLoc not in visited or cost + 1 < cameFrom[yLoc][1]):
-                    cameFrom[yLoc] = (currentLoc, cost + 1)
+                if yLoc not in visited:
                     queueItem = (cost + self.manDist(yLoc, dest) + 1, yLoc, cost + 1)
-                    if queueItem not in queue:
-                        heapq.heappush(queue, queueItem)
+                    if (self._isInBounds(yLoc) and not self._locIsWall(yLoc)) and (queueItem not in queue or (cost + 1 < cameFrom[yLoc][1])):
+                        cameFrom[yLoc] = (currentLoc, cost + 1)
+                        if queueItem not in queue:
+                            heapq.heappush(queue, queueItem)
         return None
 
     def _constructPath(self, cameFromMap, current):
         path = [current,]
-        print 'Constructing path...{}'.format(len(cameFromMap.keys()))
         while current in cameFromMap.keys():
             tempKey = current
             current = cameFromMap[current][0]
             del cameFromMap[tempKey]
             path.append(current)
-        print 'Finished constructing path!'
         path.reverse()
         return path
