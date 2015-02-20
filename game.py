@@ -67,7 +67,7 @@ class Game(object):
         data[4] = "Equipment"
 
         data[6] = (
-            "Offensive: {}".format(
+            "Left Hand: {}".format(
                 self.inventory.get_equipped_melee().name \
                 if self.inventory.get_equipped_melee() \
                 else self.inventory.get_equipped_ranged().name \
@@ -76,9 +76,9 @@ class Game(object):
                 )
         )
         data[7] = (
-            "Defensive: {}".format(
-                self.inventory.get_equipped_defense().name \
-                if self.inventory.get_equipped_defense() \
+            "Right Hand: {}".format(
+                self.inventory.get_equipped()[1].name \
+                if self.inventory.get_equipped()[1]\
                 else "Nothing"
             )
         )
@@ -110,7 +110,7 @@ class Game(object):
         # fill the next 14 lines
 
         lines = []
-        lines.append("| Offensive Weapon" + " " * 35 + " | " + "Defensive Weapon" + " " * 37 + "| " + "{:51s}".format(miscItems[0]) + "|")
+        lines.append("| Left Hand" + " " * 42 + " | " + "Right Hand" + " " * 43 + "| " + "{:51s}".format(miscItems[0]) + "|")
         lines.append("| " + " " * 52 + "|" + " " * 54 + "| " + "{:51s}".format(miscItems[1]) + "|")
 
         offensive_stats = [" Name: " + str(offensive.name), " Strength: " + str(offensive.strength)] if offensive else None
