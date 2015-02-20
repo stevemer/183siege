@@ -28,11 +28,11 @@ class Map(object):
         while self.tiles[self.player[0]][self.player[1]].data != '.':
             self.player = (random.randint(0, MAP_HEIGHT - 1), random.randint(0, MAP_WIDTH - 1))
         # generate a victory location
-        victory = (random.randint(0, MAP_HEIGHT - 1), random.randint(0, MAP_WIDTH - 1))
-        while self.tiles[victory[0]][victory[1]].data != '.':
-            victory = (random.randint(0, MAP_HEIGHT - 1), random.randint(0, MAP_WIDTH - 1))
+        self.victory = (random.randint(0, MAP_HEIGHT - 1), random.randint(0, MAP_WIDTH - 1))
+        while self.tiles[self.victory[0]][self.victory[1]].data != '.':
+            self.victory = (random.randint(0, MAP_HEIGHT - 1), random.randint(0, MAP_WIDTH - 1))
         self.tiles[self.player[0]][self.player[1]].data = 'X'
-        self.tiles[victory[0]][victory[1]].data = '@'
+        self.tiles[self.victory[0]][self.victory[1]].data = '@'
         for i in range(MAP_HEIGHT):
             for j in range(MAP_WIDTH):
                 if self.tiles[i][j].data == '.':
@@ -126,6 +126,8 @@ class Map(object):
         return False
 
     def locIsFree(self, loc):
+        if loc[0] < 0 or loc[0] >= MAP_HEIGHT or loc[1] < 0 or loc[1] > MAP_WIDTH:
+            return False
         return self.tiles[loc[0]][loc[1]].data == ' '
 
     @staticmethod
@@ -136,7 +138,7 @@ class Map(object):
         path = [src,]
         # queue holds items of structure (cost+guess, (x, y), cost)
         visited = set()
-        queue = [(manDist(src, dest), src, 0),]
+        queue = [(self.manDist(src, dest), src, 0),]
         while queue:
             loc = queue[0][1]
             cost = queue[0][2]
@@ -147,9 +149,9 @@ class Map(object):
                 return path
             for diff in (-1, 1):
                 newLoc = (loc[0] + diff, loc[1])
-                if newLoc not in visited and locIsFree(self, newLoc):
-                    heapq.heappush(queue, (cost + manDist(newLoc, dest) + 1, newLoc, cost+1))
+                if newLoc not in visited and self.locIsFree(newLoc):
+                    heapq.heappush(queue, (cost + self.manDist(newLoc, dest) + 1, newLoc, cost+1))
                 newLoc = (loc[0], loc[1] + diff)
-                if newLoc not in visited and locIsFree(self, newLoc):
-                    heapq.heappush(queue, (cost + manDist(newLoc, dest) + 1, newLoc, cost+1))
+                if newLoc not in visited and self.locIsFree(newLoc):
+                    heapq.heappush(queue, (cost + self.manDist(newLoc, dest) + 1, newLoc, cost+1))
         return None
