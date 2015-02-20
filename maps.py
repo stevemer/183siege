@@ -2,6 +2,7 @@ from constants import *
 from dungeon_generator import getMap, getEntrance
 import time, random, heapq
 from asciiart import *
+from copy import deepcopy
 
 class Tile(object):
     def __init__(self):
@@ -39,6 +40,7 @@ class Map(object):
                     self.tiles[i][j].data = ' '
                 pass
             pass
+        self._visited = set()
         self.revealRoom()
 
     def clear(self):
@@ -168,7 +170,7 @@ class Map(object):
         # return None
         src, dest = self.player, self.victory
 
-        visited = set()
+        visited = deepcopy(self._visited)
         queue = [(self.manDist(src, dest), src, 0),]
         cameFrom = {}
 
@@ -205,4 +207,5 @@ class Map(object):
             del cameFromMap[tempKey]
             path.append(current)
         path.reverse()
+        path.pop(0) # remove self.player
         return path

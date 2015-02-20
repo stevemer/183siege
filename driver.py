@@ -68,6 +68,17 @@ if __name__ == "__main__":
             elif userMove == 'x':
                 #assert(False)
                 path = game.map.findPath()
+                game.map._visited.add(game.map.player)
+                if path[0][0] < game.map.player[0]:
+                    resultOfMove = game.move("UP")
+                elif path[0][0] > game.map.player[0]:
+                    resultOfMove = game.move("DOWN")
+                elif path[0][1] < game.map.player[1]:
+                    resultOfMove = game.move("LEFT")
+                elif path[0][1] > game.map.player[1]:
+                    resultOfMove = game.move("RIGHT")
+                else:
+                    raise Exception("Find Path returned player's current square")
         except Defeat as e:
             for i in range(22): print
             print " " * 60 + str(e)
