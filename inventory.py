@@ -30,7 +30,7 @@ class Inventory(object):
             self.left_weapon = item
             self.right_weapon = None
         elif isinstance(item, MeleeWeapon):
-            self.left_weapon = item
+            self.right_weapon = item
         elif isinstance(item, Defense):
             if isinstance(self.left_weapon, RangedWeapon):
                 self.left_weapon = None
@@ -85,7 +85,7 @@ class Inventory(object):
             defense += self.left_weapon.strength
         elif isinstance(self.right_weapon, Defense):
             defense += self.right_weapon.strength
-        return damage
+        return defense
  
     def get_items(self):
         return self.get_equipped()
