@@ -22,9 +22,12 @@ if __name__ == "__main__":
     game = Game()
     userMove = '\0'
     resultOfMove = True
+    message_list = []
     while (userMove != 'q'):
         #handle move
-        game.map.printMap()
+        game.map.printMap(game.danger, game.player.health, game.inventory.miscitems["Potions"])
+        for message in message_list: print message
+        message_list = []
         try:
             if resultOfMove == VICTORY:
                 if game.level < 3:
@@ -38,11 +41,11 @@ if __name__ == "__main__":
                 else:
                     raise Victory("You have defeated the Fortress of Dorf!")
             elif resultOfMove == GOOD: 
-                print "Sir Knight, input your move. (W: up, S: down, A: left, D: right, X: automatic, I: potion): ",
+                print "Sir Knight, input your move. (W: up, S: down, A: left, D: right, X: automatic, I: potion, H: hide/unhide): ",
                 userMove = makeMove(game.getDataForAI("MOVE"))
                 print
             elif resultOfMove == ERROR:
-                print "Sorry, you can't do that. Try again? (W: up, S: down, A: left, D: right, X: automatic, I: potion): ",
+                print "Sorry, you can't do that. Try again? (W: up, S: down, A: left, D: right, X: automatic, I: potion, H: hide/unhide): ",
                 userMove = makeMove(game.getDataForAI("MOVE"))
                 print
             if userMove == 'w':
@@ -59,12 +62,16 @@ if __name__ == "__main__":
                 # TODO: Not yet fully implemented for things other than Potions
                 if result:
                     game.player.health = min(result + game.player.health, PLAYER_MAX_HEALTH)
-                    print("You drank a potion and recovered {} health!".format(result))
+                    message_list.append("You drank a potion and recovered {} health!".format(result))
                 else:
                     #self.messages.append("You don't have any Potions!")
-                    print("You don't have any Potions!")
+                    message_list.append("You don't have any Potions!")
                     #resultOfMove = ERROR
                 resultOfMove = GOOD
+            elif userMove == 'h':
+                if not game.player.hiding:
+                    game.move("HIDE")
+                    message_list.append("You hid behind a dusty statue!")
             elif userMove == 'x':
                 #assert(False)
                 path = game.map.findPath()
@@ -79,6 +86,7 @@ if __name__ == "__main__":
                     resultOfMove = game.move("RIGHT")
                 else:
                     raise Exception("Find Path returned player's current square")
+            game.update_danger()
         except Defeat as e:
             for i in range(22): print
             print " " * 60 + str(e)

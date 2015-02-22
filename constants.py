@@ -25,6 +25,20 @@ STRENGTHNAMES = {
     5: "Very Strong"
 }
 
+DANGERS = {
+    0: "Totally Safe",
+    1: "Extremely Safe",
+    2: "Very Safe",
+    3: "Probably Safe",
+    4: "Average",
+    5: "Risky",
+    6: "Very Risky",
+    7: "Extremely Risky",
+    8: "Dangerous",
+    9: "Very Dangerous",
+    10: "Extremely Dangerous!",
+}
+
 #####################################
 # Probabilities and balancing factors
 #####################################
@@ -55,7 +69,7 @@ SHIELD_LEVEL_BONUS = 0.05
 
 # Event Probabilities
 ITEM_DROP_PROBABILITY = 0.5
-ENEMY_ENCOUNTER_CHANCE = 10 / 187.5
+BASE_ENEMY_ENCOUNTER_CHANCE = 0.1    #10 / 187.5
 
 # Health
 PLAYER_MAX_HEALTH = 100

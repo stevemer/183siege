@@ -30,6 +30,15 @@ class Entity(object):
 class Player(Entity):
     def __init__(self):
         self.health = PLAYER_MAX_HEALTH
+        self.hiding = False;
+
+    def hide(self):
+        assert(self.hiding == False)
+        self.hiding = True;
+
+    def unhide(self):
+        assert(self.hiding == True)
+        self.hiding = False;
 
 class Enemy(Entity):
     def __init__(self):

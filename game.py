@@ -21,6 +21,7 @@ class Game(object):
 
         self.current_enemy = None
         self.level = 0
+        self.danger = 5
 
     def levelUp(self):
         self.level += 1
@@ -63,11 +64,11 @@ class Game(object):
         data[2] = "Next Attack: {}".format(
             STRENGTHNAMES[
                 self.current_enemy.next_attack])
-        data[3] = "- " * 25
+        data[3] = "- " * 26
         data[4] = "Equipment"
 
         data[6] = (
-            "Main Hand: {}".format(
+            "Offensive: {}".format(
                 self.inventory.get_equipped_melee().name \
                 if self.inventory.get_equipped_melee() \
                 else self.inventory.get_equipped_ranged().name \
@@ -76,13 +77,13 @@ class Game(object):
                 )
         )
         data[7] = (
-            "Offhand: {}".format(
-                self.inventory.get_equipped()[1].name \
-                if self.inventory.get_equipped()[1]\
+            "Defensive: {}".format(
+                self.inventory.get_equipped_defense().name \
+                if self.inventory.get_equipped_defense() \
                 else "Nothing"
             )
         )
-        data[8] = "- " * 25
+        data[8] = "- " * 26
         data[9] = "INVENTORY"
         data[11] = (
             "Potions: {}".format(
@@ -98,10 +99,19 @@ class Game(object):
     def printItems(self):  # TODO: list enemy weapon in case we want it?
 
         # populate list
-        # offensive = self.inventory.get_equipped_ranged() or self.inventory.get_equipped_melee()
-        # defensive = self.inventory.get_equipped_defense()
-        offensive,defensive = self.inventory.get_equipped()
+        offensive = self.inventory.get_equipped_ranged() or self.inventory.get_equipped_melee()
+        defensive = self.inventory.get_equipped_defense()        
 
+        offensive_image = getattr(asciiart, offensive.image).split('\n') if offensive else None
+        return data
+
+    def printItems(self):  # TODO: list enemy weapon in case we want it?
+
+        # populate list
+        offensive = self.inventory.get_equipped_ranged() or self.inventory.get_equipped_melee()
+        defensive = self.inventory.get_equipped_defense()        
+
+        offensive_image = getattr(asciiart, offensive.image).split('\n') if offensive else None
         offensive_image = getattr(asciiart, offensive.image).split('\n') if offensive else None
         defensive_image = getattr(asciiart, defensive.image).split('\n') if defensive else None
 
@@ -358,19 +368,43 @@ class Game(object):
         elif self.player.isDead():
             raise Defeat("You have been defeated.")
 
-    def checkEvent(self, tile):
+    def checkEvent(self):
         pass
         random.seed()
         event_value = random.uniform(0, 1)
-        if event_value <= ENEMY_ENCOUNTER_CHANCE:
+        encounter_chance = BASE_ENEMY_ENCOUNTER_CHANCE * self.danger 
+        # if the player's hiding, they might not be found
+        # current implementation: player is safe when hiding
+        if self.player.hiding: 
+            encounter_chance = -1
+            self.player.hiding = False
+        '''
+        if self.player.hiding:
+            encounter_chance /= 5.0
+        '''
+        if event_value <= encounter_chance:
             # spawn an enemy TODO generator
             self.current_enemy = self.enemy_factory.generateEnemy()
             self.runEvent()
 
+    def update_danger(self):
+        temp_danger = self.danger
+        danger_change = random.randint(0,2)
+        up_or_down = random.randint(0,1)
+        if up_or_down: temp_danger += danger_change
+        else: temp_danger -= danger_change
+        if temp_danger > 10: temp_danger = 10
+        elif temp_danger < 0: temp_danger = 0
+        self.danger = temp_danger
+
     def move(self, direction):
         tile = (-1, -1)
         x, y = self.map.player
-        if direction == 'UP':
+        if direction == 'HIDE':
+            self.player.hiding = True
+            self.checkEvent()
+            return 1
+        elif direction == 'UP':
             tile = (x - 1, y)
         elif direction == "DOWN":
             tile = (x + 1, y)
@@ -382,7 +416,7 @@ class Game(object):
         if self.map.canMove(direction):
             if self.map.mapMove(direction):
                 return 2
-            self.checkEvent(tile)
+            self.checkEvent()
             return 1
         else:
             return 0
