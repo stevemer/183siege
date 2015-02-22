@@ -137,6 +137,7 @@ class Game(object):
             print line
 
     def printScreen(self):
+        for i in range(3): print
         # update to remove old messages
         while len(self.messages) > 8:
             self.messages.pop(0)

@@ -26,10 +26,10 @@ STRENGTHNAMES = {
 }
 
 DANGERS = {
-    0: "Totally Safe",
+    0: "Totally Safe!",
     1: "Extremely Safe",
     2: "Very Safe",
-    3: "Probably Safe",
+    3: "Safe",
     4: "Average",
     5: "Risky",
     6: "Very Risky",
@@ -69,7 +69,7 @@ SHIELD_LEVEL_BONUS = 0.05
 
 # Event Probabilities
 ITEM_DROP_PROBABILITY = 0.5
-BASE_ENEMY_ENCOUNTER_CHANCE = 0.1    #10 / 187.5
+BASE_ENEMY_ENCOUNTER_CHANCE = .1 #10 / 187.5
 
 # Health
 PLAYER_MAX_HEALTH = 100
@@ -83,3 +83,16 @@ class Defeat(Exception):
 
 class Victory(Exception):
     pass
+
+HIDING_MSGS = [
+    "You hide behind a dusty statue!",
+    "You hide in a nearby closet!",
+    "You crouch behind some dusty crates!",
+    "You disguise yourself using dirt and vegetation!",
+    "You crouch in the shadows.",
+    "You carefully evade a patrolling guard!",
+    "You take a quick nap in a nearby closet.",
+    "You use your ninja skills to hang from the ceiling!",
+    "You are almost caught, but the troll has bad eyesight and mistakes you for a wall.",
+    "Hiding is for cowards!... and for people who like winning.",
+]

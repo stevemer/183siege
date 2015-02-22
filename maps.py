@@ -83,9 +83,10 @@ class Map(object):
                     self.tiles[x-1][y-1].visible = True
                     visible.append((x-1,y-1))
 
-    def printMap(self, danger, health, potions):
+    def printMap(self, danger, health, potions, message):
+        for i in range(3): print
         #"Currently hiding!" if hiding else "Visible!"
-        print HEADER.format(DANGERS[danger], str(health), str(potions))
+        print HEADER.format(DANGERS[danger], str(health), str(potions), message)
         print '- ' * (MAP_WIDTH + 1) + '-'
         for i in range(MAP_HEIGHT):
             output = ''
