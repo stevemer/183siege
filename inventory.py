@@ -3,7 +3,7 @@ from entities import *
 
 class Inventory(object):
     def __init__(self):
-        self.left_weapon = MeleeWeapon("SWORD", "Wooden Sword", 1)
+        self.left_weapon = MeleeWeapon("SWORD", "Wooden Sword", 3)
         self.right_weapon = None #Defense("SHIELD", "Wooden Shield", 1)
         self.miscitems = {
             "Potions": 3, 

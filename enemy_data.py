@@ -5,8 +5,8 @@ enemies = [
         "name": "Cave Goblin",
         "image": "GOBLIN",
         "health": {
-            "min": 1,
-            "max": 5,
+            "min": 5,
+            "max": 10,
         },
         "items": [
             {"name": "Smelly Dagger","type": "SWORD", "strength": 5},
@@ -18,8 +18,8 @@ enemies = [
         "name": "Big Goblin",
         "image": "GOBLIN",
         "health": {
-            "min": 1,
-            "max": 5,
+            "min": 8,
+            "max": 10,
         },
         "items": [
             {"name": "Risty Dagger","type": "SWORD", "strength": 6},
@@ -31,8 +31,8 @@ enemies = [
         "name": "Skeleton",
         "image": "SKELETON",
         "health": {
-            "min": 3,
-            "max": 8,
+            "min": 8,
+            "max": 20,
         },
         "items": [
             {"name": "Plain Sword","type": "SWORD", "strength": 7},
@@ -44,8 +44,8 @@ enemies = [
         "name": "Big Skeleton",
         "image": "SKELETON",
         "health": {
-            "min": 3,
-            "max": 8,
+            "min": 12,
+            "max": 20,
         },
         "items": [
             {"name": "Good Sword","type": "SWORD", "strength": 8},
@@ -57,8 +57,8 @@ enemies = [
         "name": "Mud Troll",
         "image": "TROLL",
         "health": {
-            "min": 5,
-            "max": 15,
+            "min": 20,
+            "max": 30,
         },
         "items": [
             {"name": "Club of Whacking","type": "CLUB", "strength": 9},
