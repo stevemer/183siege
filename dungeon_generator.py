@@ -352,7 +352,7 @@ def getEntrance():
     m.append(
         "                                                                                                                                                                 ")
     m.append(
-        "                                                                                                                                                                 ")
+        "                                                                                                                        Developed by Steve Merritt, December 2014")
     m.append(
-        "                                                                                                                                                                 ")
+        "                                                                                                Licensed exclusively for use by EECS 183, University of Michigan.")
     return [[y for y in x] for x in m]

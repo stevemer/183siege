@@ -49,6 +49,7 @@ def printHelpScreen():
 
 def entranceAnimation():
     outside = getEntrance()
+    for i in range(15): print
     for line in outside:
         print ''.join(line)
     print "Press [ENTER] to begin your adventure..."
@@ -57,6 +58,7 @@ def entranceAnimation():
     player_y = 79
     old = outside[player_x][player_y]
     outside[player_x][player_y] = 'X'
+    for i in range(15): print
     for line in outside:
         print ''.join(line)
     time.sleep(.5)
@@ -65,10 +67,12 @@ def entranceAnimation():
         player_x -= 1
         old = outside[player_x][player_y]
         outside[player_x][player_y] = 'X'
+        for i in range(15): print
         for line in outside:
             print ''.join(line)
         time.sleep(.25)
     time.sleep(1)
+    for i in range(15): print
     for i in range(22):
         print
     print " " * 70 + "Begin"
