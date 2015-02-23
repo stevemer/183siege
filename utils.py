@@ -53,7 +53,7 @@ def entranceAnimation():
     for line in outside:
         print ''.join(line)
     print "Press [ENTER] to begin your adventure..."
-    getch()
+    if not USE_AI: getch()
     player_x = 30
     player_y = 79
     old = outside[player_x][player_y]

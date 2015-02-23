@@ -99,7 +99,6 @@ class Game(object):
         return data
 
     def printItems(self):  # TODO: list enemy weapon in case we want it?
-
         # populate list
         offensive = self.inventory.get_equipped_ranged() or self.inventory.get_equipped_melee()
         defensive = self.inventory.get_equipped_defense() or self.inventory.get_equipped()[1]

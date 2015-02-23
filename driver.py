@@ -36,7 +36,8 @@ if __name__ == "__main__":
             assert(len(message_list) == 1)
             message = message_list[0]
             message_list = []
-        game.map.printMap(game.danger, game.player.health, game.inventory.miscitems["Potions"], message, game.level if game.level < 4 else (4 - (game.level % 4) - 1))
+        game.map.printMap(game.danger, game.player.health, game.inventory.miscitems["Potions"], message, 
+            (game.level if game.level < 4 else (4 - (game.level % 4) - 1)) if STORY_MODE else game.level)
         #handle move
         userMove = makeMove(game.getDataForAI("MOVE"))
         try:
@@ -60,6 +61,7 @@ if __name__ == "__main__":
                 path = game.map.findPath()
                 assert(path != None)
                 game.map._visited.add(game.map.player)
+                print path, game.map.player
                 if path[0][0] < game.map.player[0]:
                     resultOfMove = game.move("UP")
                 elif path[0][0] > game.map.player[0]:
@@ -74,15 +76,16 @@ if __name__ == "__main__":
                 resultOfMove = ERROR
             if resultOfMove == VICTORY:
                 game.levelUp()
-                if not USE_AI:
+                if STORY_MODE:
                     # story mode
                     if game.level == 4:
                         # found the amulet
                         for i in range(22): print
                         print " " * 60 + "You've found the Amulet of Awesomeness! Escape while you still can!".format(game.level if game.level < 4 else (4 - (game.level % 4)))
                         for i in range(22): print
-                        print "Press [ENTER] to continue..."
-                        getch()
+                        if not USE_AI: 
+                            print "Press [ENTER] to continue..."
+                            getch()
 
                     if game.level == 7:
                         raise Victory("You have defeated the Fortress of Dorf!")
@@ -90,8 +93,9 @@ if __name__ == "__main__":
                         for i in range(22): print
                         print " " * 70 + "Fortress of Dorf: Floor {0}".format(game.level if game.level < 4 else (4 - (game.level % 4) - 1))
                         for i in range(22): print
-                        print "Press [ENTER] to continue..."
-                        getch()
+                        if not USE_AI: 
+                            print "Press [ENTER] to continue..."
+                            getch()
                 game.map = Map(game.level)
             elif resultOfMove == GOOD: 
                 game.update_danger()
@@ -100,7 +104,11 @@ if __name__ == "__main__":
                 message_list.append("Sorry, you can't do that!") 
         except Defeat as e:
             for i in range(22): print
-            print " " * 60 + str(e)
+            if not STORY_MODE:
+                # print statistics
+                print " " * 50 + "AI Results: {0} Levels Completed.".format(game.level)
+            else:
+                print " " * 60 + str(e)
             for i in range(22): print
             sys.exit()
         except Victory as e:

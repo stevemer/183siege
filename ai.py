@@ -40,11 +40,14 @@ def makeMove(options):
     """ Students will implement this function """
     if not USE_AI:
         return getch()
-    time.sleep(1)
-    if options["decision"] == "ACTION":
+    time.sleep(0.02)
+    if options["decision"] == "ATTACK":
         return "x"
     elif options["decision"] == "ITEM":
-        return "y"
+        return "3"
     elif options["decision"] == "MOVE":
-        return random.choice(["w", 'a', 's', 'd'])
+        if options['danger'] > 1:
+            return 'h'
+        return 'x'
+        #random.choice(["w", 'a', 's', 'd'])
 

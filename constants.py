@@ -2,8 +2,8 @@
 # Enable/Disable student AI 
 #####################################
 
-USE_AI = False
-ENABLE_STORYLINE = False
+USE_AI = True
+STORY_MODE = False
 
 #####################################
 # Game mechanics and const globals 
