@@ -126,8 +126,10 @@ class Map(object):
             self.player = (x,y+1)
         elif direction == "LEFT":
             self.player = (x,y-1)
+        if self.tiles[self.player[0]][self.player[1]].data == '*':
+            # player has found the Amulet of Awesomeness
+            return True
         if self.tiles[self.player[0]][self.player[1]].data == '@':
-            print "VICTORY! You've found the magical staircase!"
             return True
         self.tiles[self.player[0]][self.player[1]].data = 'X'
         self.revealRoom()

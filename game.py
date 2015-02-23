@@ -384,8 +384,8 @@ class Game(object):
     def update_danger(self):
         temp_danger = self.danger
         danger_change = random.randint(0,2)
-        up_or_down = random.randint(0,1)
-        if up_or_down: temp_danger += danger_change
+        up_or_down = random.uniform(0,1)
+        if up_or_down <= DANGER_MODIFIER: temp_danger += danger_change
         else: temp_danger -= danger_change
         if temp_danger > 10: temp_danger = 10
         elif temp_danger < 0: temp_danger = 0
