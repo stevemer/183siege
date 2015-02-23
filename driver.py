@@ -20,7 +20,7 @@ DIRS = {
 if __name__ == "__main__":
     random.seed()         
 
-    #entranceAnimation()
+    entranceAnimation()
 
     VICTORY = 2
     GOOD = 1
@@ -30,19 +30,18 @@ if __name__ == "__main__":
     userMove = '\0'
     resultOfMove = True
     message_list = []
-    game.map.printMap(game.danger, game.player.health, game.inventory.miscitems["Potions"], '')
     while (userMove != 'q'):
-        #handle move
-        userMove = makeMove(game.getDataForAI("MOVE"))
         message = ''
         if message_list:
             assert(len(message_list) == 1)
             message = message_list[0]
             message_list = []
         game.map.printMap(game.danger, game.player.health, game.inventory.miscitems["Potions"], message)
+        #handle move
+        userMove = makeMove(game.getDataForAI("MOVE"))
         try:
             if userMove in ['w', 's', 'a', 'd']:
-                game.move(DIRS[userMove])
+                resultOfMove = game.move(DIRS[userMove])
             elif userMove == 'i':
                 item_type = "Potions"
                 result = game.inventory.use_misc(item_type)
@@ -82,12 +81,9 @@ if __name__ == "__main__":
                 else:
                     raise Victory("You have defeated the Fortress of Dorf!")
             elif resultOfMove == GOOD: 
-                if not message_list:
-                    message_list.append("Success!")
-                print
+                pass
             elif resultOfMove == ERROR:
                 message_list.append("Sorry, you can't do that!") 
-                print
             game.update_danger()
         except Defeat as e:
             for i in range(22): print
