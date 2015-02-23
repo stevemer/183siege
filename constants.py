@@ -72,7 +72,7 @@ ITEM_DROP_PROBABILITY = 0.5
 BASE_ENEMY_ENCOUNTER_CHANCE = .1 #10 / 187.5
 
 # Health
-PLAYER_MAX_HEALTH = 100
+PLAYER_MAX_HEALTH = 300
 
 #####################################
 # Custom game exceptions 
