@@ -58,6 +58,7 @@ if __name__ == "__main__":
                     message_list.append(HIDING_MSGS[random.randint(0,len(HIDING_MSGS) - 1)])
             elif userMove == 'x':
                 path = game.map.findPath()
+                assert(path != None)
                 game.map._visited.add(game.map.player)
                 if path[0][0] < game.map.player[0]:
                     resultOfMove = game.move("UP")

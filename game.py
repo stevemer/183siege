@@ -68,7 +68,7 @@ class Game(object):
         data[4] = "Equipment"
 
         data[6] = (
-            "Offensive: {}".format(
+            "Main Hand: {}".format(
                 self.inventory.get_equipped_melee().name \
                 if self.inventory.get_equipped_melee() \
                 else self.inventory.get_equipped_ranged().name \
@@ -77,7 +77,7 @@ class Game(object):
                 )
         )
         data[7] = (
-            "Defensive: {}".format(
+            "Off-Hand: {}".format(
                 self.inventory.get_equipped_defense().name \
                 if self.inventory.get_equipped_defense() \
                 else "Nothing"
@@ -100,7 +100,7 @@ class Game(object):
 
         # populate list
         offensive = self.inventory.get_equipped_ranged() or self.inventory.get_equipped_melee()
-        defensive = self.inventory.get_equipped_defense()        
+        defensive = self.inventory.get_equipped_defense() or self.inventory.get_equipped()[1]
 
         offensive_image = getattr(asciiart, offensive.image).split('\n') if offensive else None
         offensive_image = getattr(asciiart, offensive.image).split('\n') if offensive else None

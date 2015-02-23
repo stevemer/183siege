@@ -22,7 +22,7 @@ enemies = [
             "max": 10,
         },
         "items": [
-            {"name": "Risty Dagger","type": "SWORD", "strength": 6},
+            {"name": "Rusty Dagger","type": "SWORD", "strength": 6},
             {"name": "Grimy Bow", "type": "BOW", "strength": 6},
             {"name": "Old Shield", "type": "SHIELD", "strength": 6},
         ]

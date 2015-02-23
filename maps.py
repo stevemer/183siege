@@ -150,26 +150,6 @@ class Map(object):
         return abs(src[0] - dest[0]) + abs(src[1] - dest[1])
 
     def findPath(self):
-        # path = [src,]
-        # # queue holds items of structure (cost+guess, (x, y), cost)
-        # visited = set()
-        # queue = [(self.manDist(src, dest), src, 0),]
-        # while queue:
-        #     loc = queue[0][1]
-        #     cost = queue[0][2]
-        #     visited.add(loc)
-        #     queue = queue[1:]
-        #     if loc == dest:
-        #         path.append(dest)
-        #         return path
-        #     for diff in (-1, 1):
-        #         newLoc = (loc[0] + diff, loc[1])
-        #         if newLoc not in visited and self.locIsFree(newLoc):
-        #             heapq.heappush(queue, (cost + self.manDist(newLoc, dest) + 1, newLoc, cost+1))
-        #         newLoc = (loc[0], loc[1] + diff)
-        #         if newLoc not in visited and self.locIsFree(newLoc):
-        #             heapq.heappush(queue, (cost + self.manDist(newLoc, dest) + 1, newLoc, cost+1))
-        # return None
         src, dest = self.player, self.victory
 
         visited = deepcopy(self._visited)
@@ -188,7 +168,7 @@ class Map(object):
                 if xLoc not in visited:
                     queueItem = (cost + self.manDist(xLoc, dest) + 1, xLoc, cost + 1)
                     if (self._isInBounds(xLoc) and not self._locIsWall(xLoc)) and (queueItem not in queue or (cost + 1 < cameFrom[xLoc][1])):
-                        cameFrom[xLoc] = (currentLoc, cost + 1) # update cameFrom map so that xLoc -> where I came from
+                        cameFrom[xLoc] = (currentLoc, cost + 1) # update cameFrom map so that xLoc -> where I came from, and distance
                         if queueItem not in queue:
                             heapq.heappush(queue, queueItem)
 
@@ -196,7 +176,7 @@ class Map(object):
                 if yLoc not in visited:
                     queueItem = (cost + self.manDist(yLoc, dest) + 1, yLoc, cost + 1)
                     if (self._isInBounds(yLoc) and not self._locIsWall(yLoc)) and (queueItem not in queue or (cost + 1 < cameFrom[yLoc][1])):
-                        cameFrom[yLoc] = (currentLoc, cost + 1)
+                        cameFrom[yLoc] = (currentLoc, cost + 1)  # update cameFrom map so that yLoc -> where I came from, and distance
                         if queueItem not in queue:
                             heapq.heappush(queue, queueItem)
         return None
@@ -209,5 +189,5 @@ class Map(object):
             del cameFromMap[tempKey]
             path.append(current)
         path.reverse()
-        path.pop(0) # remove self.player
+        path.pop(0) # remove self.player position
         return path
