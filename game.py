@@ -364,7 +364,7 @@ class Game(object):
         pass
         random.seed()
         event_value = random.uniform(0, 1)
-        encounter_chance = BASE_ENEMY_ENCOUNTER_CHANCE * self.danger 
+        encounter_chance = 0.1 + BASE_ENEMY_ENCOUNTER_CHANCE * self.danger 
         # if the player's hiding, they might not be found
         # current implementation: player is safe when hiding
         if self.player.hiding: 
