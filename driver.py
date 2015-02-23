@@ -20,7 +20,7 @@ DIRS = {
 if __name__ == "__main__":
     random.seed()         
 
-    entranceAnimation()
+    #entranceAnimation()
 
     VICTORY = 2
     GOOD = 1
@@ -28,15 +28,15 @@ if __name__ == "__main__":
 
     game = Game()
     userMove = '\0'
-    resultOfMove = True
     message_list = []
     while (userMove != 'q'):
+        resultOfMove = GOOD
         message = ''
         if message_list:
             assert(len(message_list) == 1)
             message = message_list[0]
             message_list = []
-        game.map.printMap(game.danger, game.player.health, game.inventory.miscitems["Potions"], message)
+        game.map.printMap(game.danger, game.player.health, game.inventory.miscitems["Potions"], message, game.level if game.level < 4 else (4 - (game.level % 4)))
         #handle move
         userMove = makeMove(game.getDataForAI("MOVE"))
         try:
@@ -71,16 +71,17 @@ if __name__ == "__main__":
                 else:
                     raise Exception("Find Path returned player's current square")
             if resultOfMove == VICTORY:
-                if game.level < 3:
-                    for i in range(22): print
-                    print " " * 70 + "Level {} Complete".format(game.level)
-                    for i in range(22): print
-                    game.levelUp()
-                    print "Press [ENTER] to continue..."
-                    getch()
-                    game.map = Map()
-                else:
-                    raise Victory("You have defeated the Fortress of Dorf!")
+                game.levelUp()
+                if not USE_AI:
+                    if game.level == 7:
+                        raise Victory("You have defeated the Fortress of Dorf!")
+                    else:
+                        for i in range(22): print
+                        print " " * 70 + "Fortress of Dorf: Floor {0}".format(game.level if game.level < 4 else (4 - (game.level % 4)))
+                        for i in range(22): print
+                        print "Press [ENTER] to continue..."
+                        getch()
+                game.map = Map(game.level)
             elif resultOfMove == GOOD: 
                 pass
             elif resultOfMove == ERROR:

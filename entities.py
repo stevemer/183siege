@@ -3,15 +3,31 @@ from weapons import *
 from constants import *
 from enemy_data import enemies, enemy_freqs
 
-def weaponConstructor(weapon):
-    if weapon == "SWORD":
-        return MeleeWeapon
-    if weapon == "CLUB":
-        return MeleeWeapon
-    if weapon == "BOW":
-        return RangedWeapon
-    if weapon == "SHIELD":
-        return Defense
+class WeaponConstructor(object):
+    def __init__(self):
+        self.dropped_shield = False
+        self.dropped_bow = False
+        self.dropped_sword = False
+
+    def __call__(self, weapon, name, strength):
+        if not self.dropped_shield:
+            self.dropped_shield = True
+            return Defense("SHIELD", "Moldy Shield", 5)
+        elif not self.dropped_bow:
+            self.dropped_bow = True
+            return RangedWeapon("BOW", "Slimy Bow", 5)
+        elif not self.dropped_sword:
+            self.dropped_sword = True
+            return MeleeWeapon("SWORD", "Smelly Dagger", 5)
+        elif weapon == "SHIELD":
+            return Defense(weapon, name, strength)
+        elif not self.dropped_bow or weapon == "BOW":
+            return RangedWeapon(weapon, name, strength)
+        elif not self.dropped_sword or weapon == "SWORD":
+            return MeleeWeapon(weapon, name, strength)
+        elif weapon == "CLUB":
+            return MeleeWeapon(weapon, name, strength)
+        raise Exception("Bad argument to weapon constructor!")
 
 class BaseConstructorException(Exception):
     pass    
@@ -53,10 +69,11 @@ class Enemy(Entity):
 
 class EnemyFactory(object):
     def __init__(self):
+        self.weapon_constructor = WeaponConstructor()
         random.seed()
         pass
 
-    def generateEnemy(self):
+    def generateEnemy(self, level):
         # compute enemy event
         choice = 0
         p = 0
@@ -67,14 +84,14 @@ class EnemyFactory(object):
                 choice = i
                 break 
         # select enemy
-        enemy = enemies[choice]
+        enemy = enemies[min(choice, level - 1)]
         item = enemy["items"][random.randint(0, len(enemy["items"])-1)] 
         
         return Enemy(
             enemy["image"], 
             enemy["name"], 
             random.randint(enemy["health"]["min"], enemy["health"]["max"]),
-            weaponConstructor(item["type"])(item["type"], item["name"], item["strength"])
+            self.weapon_constructor(item["type"], item["name"], item["strength"])
         )
             
             

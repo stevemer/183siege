@@ -10,7 +10,7 @@ class Tile(object):
         self.data = ' '
 
 class Map(object):
-    def __init__(self):
+    def __init__(self, level):
         map_grid = getMap(MAP_WIDTH, MAP_HEIGHT)
         self.tiles = list()
         for i in range(MAP_HEIGHT):
@@ -32,8 +32,12 @@ class Map(object):
         self.victory = (random.randint(0, MAP_HEIGHT - 1), random.randint(0, MAP_WIDTH - 1))
         while self.tiles[self.victory[0]][self.victory[1]].data != '.':
             self.victory = (random.randint(0, MAP_HEIGHT - 1), random.randint(0, MAP_WIDTH - 1))
+
+        # create player and victory location
         self.tiles[self.player[0]][self.player[1]].data = 'X'
-        self.tiles[self.victory[0]][self.victory[1]].data = '@'
+
+        # create victory location. If it's the 3rd level, create an asterisk.
+        self.tiles[self.victory[0]][self.victory[1]].data = '@' if level != 3 or USE_AI else '*'
         for i in range(MAP_HEIGHT):
             for j in range(MAP_WIDTH):
                 if self.tiles[i][j].data == '.':
@@ -83,10 +87,10 @@ class Map(object):
                     self.tiles[x-1][y-1].visible = True
                     visible.append((x-1,y-1))
 
-    def printMap(self, danger, health, potions, message):
+    def printMap(self, danger, health, potions, message, floor):
         for i in range(3): print
         #"Currently hiding!" if hiding else "Visible!"
-        print HEADER.format(DANGERS[danger], str(health), str(potions), message)
+        print HEADER.format(DANGERS[danger], str(health), str(potions), message, floor)
         print '- ' * (MAP_WIDTH + 1) + '-'
         for i in range(MAP_HEIGHT):
             output = ''

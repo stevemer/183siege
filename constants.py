@@ -3,6 +3,7 @@
 #####################################
 
 USE_AI = False
+ENABLE_STORYLINE = False
 
 #####################################
 # Game mechanics and const globals 
@@ -69,7 +70,7 @@ SHIELD_LEVEL_BONUS = 0.05
 
 # Event Probabilities
 ITEM_DROP_PROBABILITY = 0.5
-BASE_ENEMY_ENCOUNTER_CHANCE = .05 #10 / 187.5
+BASE_ENEMY_ENCOUNTER_CHANCE = .03 #10 / 187.5
 
 # Health
 PLAYER_MAX_HEALTH = 300

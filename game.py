@@ -14,14 +14,15 @@ from ai import makeMove
 class Game(object):
 
     def __init__(self):
-        self.map = Map()
+        self.map = Map(1)
         self.player = Player()
         self.inventory = Inventory()
         self.enemy_factory = EnemyFactory()
 
         self.current_enemy = None
-        self.level = 0
+        self.level = 1
         self.danger = 5
+        self.items_dropped = 0 # a counter so we make sure they get shield, sword and bow chances first
 
     def levelUp(self):
         self.level += 1
@@ -333,7 +334,8 @@ class Game(object):
             self.printScreen()
 
             p = random.uniform(0, 1)
-            if p <= ITEM_DROP_PROBABILITY:
+            if p <= ITEM_DROP_PROBABILITY or self.items_dropped < 3:
+                self.items_dropped += 1
                 self.messages.append(
                     "The {0} dropped a {1}...".format(
                         self.current_enemy.name,
@@ -364,7 +366,7 @@ class Game(object):
         pass
         random.seed()
         event_value = random.uniform(0, 1)
-        encounter_chance = 0.1 + BASE_ENEMY_ENCOUNTER_CHANCE * self.danger 
+        encounter_chance = 0.03 + BASE_ENEMY_ENCOUNTER_CHANCE * self.danger 
         # if the player's hiding, they might not be found
         # current implementation: player is safe when hiding
         if self.player.hiding: 
@@ -376,7 +378,7 @@ class Game(object):
         '''
         if event_value <= encounter_chance:
             # spawn an enemy TODO generator
-            self.current_enemy = self.enemy_factory.generateEnemy()
+            self.current_enemy = self.enemy_factory.generateEnemy(self.level)
             self.runEvent()
 
     def update_danger(self):
