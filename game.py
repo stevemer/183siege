@@ -83,7 +83,7 @@ class Game(object):
                 else "Nothing"
             )
         )
-        data[3] = "- " * 25 + "-"
+        data[8] = "- " * 25 + "-"
         data[9] = "INVENTORY"
         data[11] = (
             "Potions: {}".format(
@@ -94,15 +94,6 @@ class Game(object):
         data[13] = (
             "Trinkets: {}".format(
                 self.inventory.miscitems['Trinkets']))  # num trinkets
-        return data
-
-    def printItems(self):  # TODO: list enemy weapon in case we want it?
-
-        # populate list
-        offensive = self.inventory.get_equipped_ranged() or self.inventory.get_equipped_melee()
-        defensive = self.inventory.get_equipped_defense()        
-
-        offensive_image = getattr(asciiart, offensive.image).split('\n') if offensive else None
         return data
 
     def printItems(self):  # TODO: list enemy weapon in case we want it?
