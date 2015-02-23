@@ -51,6 +51,7 @@ class Game(object):
                 "misc": self.inventory.miscitems,
             },
             "level": self.level,
+            "danger": self.danger,
         }
 
     def _inventoryData(self):
