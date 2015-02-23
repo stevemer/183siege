@@ -1,4 +1,4 @@
-enemy_freqs = [0.6, 0.3, 0.1]
+enemy_freqs = [0.35, 0.35, 0.3]
 
 enemies = [
     {
