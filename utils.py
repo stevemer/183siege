@@ -1,4 +1,5 @@
 from dungeon_generator import getEntrance
+from constants import *
 from getch import getch
 import time
 

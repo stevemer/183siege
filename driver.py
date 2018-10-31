@@ -20,7 +20,7 @@ DIRS = {
 if __name__ == "__main__":
     random.seed()         
 
-    #entranceAnimation()
+    entranceAnimation()
 
     VICTORY = 2
     GOOD = 1
